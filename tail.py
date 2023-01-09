@@ -2,6 +2,7 @@ from blbmgr import BlbManager
 from center import Center
 from branch import Branch
 from blockchecker import BlockChecker
+from sat2.pathnode import PathNode
 
 
 def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
@@ -11,7 +12,7 @@ def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
     # dic1:{ 11:0, 21:1}, dic2:{11:0, 21:0} -> {(11,0)}
     # dic1:{ 11:0, 21:1}, dic2:{11:1, 21:0} -> {}
     # -------------------------------------
-    # this not possible to gwet to here:
+    # it should not be possible to have dict == dict:
     # dic1:{ 11:0, 21:1}, dic2:{11:0, 21:1} -> {(11,0),(21,1)} 
     s1 = set(tuple(vk2a.dic.items()))
     s2 = set(tuple(vk2b.dic.items()))
@@ -61,7 +62,24 @@ class Tail:
                 if len(self.bdic[b]) == 0:
                     del self.bdic[b]
         return vk
-            
+    
+    def generate_2sats(self):
+        sat_dics = {}
+        dics = {}
+        for chv in self.bgrid.chvset:
+            dics[chv] = {}
+            for kn in self.cvks_dic[chv]:
+                d = self.vk2dic[kn].dic
+                dics[chv][kn] = d.copy()
+        for chv, dic in dics.items():
+            pn = PathNode(None, dic)
+            if not pn.done:
+                pn.split_me()
+            pn.include_wildbits()
+            sat_dics[chv] = pn.solution_sats
+        self.pn2sat = sat_dics
+        x = 0
+
     def clone(self, split_sat_tpl):
         ntail = Tail(
             self.bgrid, 

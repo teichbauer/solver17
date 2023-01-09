@@ -1,3 +1,4 @@
+from sat2.lib2 import esxpand_bitcombo
 
 class Clause:
     def __init__(self, name, dic):
@@ -23,6 +24,15 @@ class Clause:
                 dic[b] = self.dic[b]
         return Clause(bits, dic)
     
+    def sats(self):
+        dics = esxpand_bitcombo(self.bits)
+        sats = []
+        for d in dics:
+            if d != self.dic:
+                sats.append(d)
+        return sats
+
+
     def verify(self, sats):  # sats must not have a single 2 among the values
         if set(self.bits).issubset(set(sats)):
             b0, b1 = self.bits

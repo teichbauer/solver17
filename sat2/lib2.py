@@ -31,7 +31,8 @@ def _get_bv(v, bit):
     x = v >> bit
     return x & 1
 
-def _expand(bits):
+def esxpand_bitcombo(bits):
+    # return a list of dics with 4 possible bit/bv combinations
     # example: bits = [2, 5]
     # output: [{2:0, 5:0}, {2:0, 5:1}, {2:1, 5:0}, {2:1, 5:1}, ]
     # ----------------------------------------------------------
@@ -68,7 +69,7 @@ def expand_wildcard(sats):
                 bs.append(bit)
         for b in bs:
             sdic.pop(b)
-        edics = _expand(bs)
+        edics = esxpand_bitcombo(bs)
         for xdic in edics:
             ndic = sdic.copy()
             ndic.update(xdic)
@@ -77,7 +78,7 @@ def expand_wildcard(sats):
 
 
 if __name__ == '__main__':
-    ds = _expand([2,4,5])
+    ds = esxpand_bitcombo([2,4,5])
     # fixed sat
     sat1 = {0:1,1:1,2:0,4:1, 3:1}   
 

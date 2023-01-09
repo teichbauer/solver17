@@ -1,21 +1,27 @@
-from clause import Clause
-from lib2 import output_dic, output_clause, expand_wildcard
+from sat2.clause import Clause
+from sat2.lib2 import output_dic, output_clause, expand_wildcard
 import os
 
 class PathNode:
     # klauses: [(C2, C3), (¬C3, C4), (C2, C4), (¬C1, ¬C2), (¬C3, C1)] =>
     # C3 -> 2:0, ¬C2 -> 1:1
     # [{1:0,2:0}, {2:1, 3:0}, {1:0, 3:0}, {0:1, 1:1}, {2:1, 0:0}]
-    solution_sats = []
+    
     def __init__(self, parent,  # where this node splitted from. On root: None
                 klauses,        # set of 2sat clauses ({<name>:{1:0, 3:1},..})
                 sats={}):       # for root {}
                 # sats can be 
                 # 1. None: split-sat conflict itself: this node is a stopper
                 # 2. sat resulted from split
+        self.bitkdic = {}  # {bit: set(name1, name2,..)}        
         self.parent = parent
         # child node first clone sat from parent
-        self.sats = parent.sats.copy() if parent else {}
+        if parent:
+            self.sats = parent.sats.copy() 
+            self.solution_sats = parent.solution_sats 
+        else:
+            self.solution_sats = []
+            self.sats = {}
         if parent:
             # add the given sats to the sat cloned from parent.
             # this may have conflict: results in False, causing stop = True
@@ -27,9 +33,20 @@ class PathNode:
             if not self.stop:
                 self.solution_sats.append(self.sats)
             return
+        if len(klauses) == 1:
+            name, dic = tuple(klauses)[0]  # klauses has only 1 (name,dic)
+            cl = Clause(name, dic)
+            slst = cl.sats()
+            for s in slst:
+                sat = self.sats.copy()
+                sat.update(s)
+                self.solution_sats.append(sat)
+            self.bitkdic = {bit: [name] for bit in cl.bits}
+            self.done = True
+            return
         self.done = False
         self.clauses = {}
-        self.bitkdic = {}  # {bit: set(name1, name2,..)}
+        
 
         for name, dic in klauses.items():
             for bit in dic:
