@@ -26,6 +26,10 @@ class BitGrid:
         self.chvset = set(chlst)
 
     def bits_cvs(self, dic):
+        '''
+        example: {46:1, 44:1, 36:0} -> {0, 1, 2, 3, 4, 5, 7} (6 is hit)
+         from [*,*,*] (000,001,010,...) - [1,1,0] ->(0,1,2,3,4,5,7)
+        '''
         bits = list(dic)
         g = [2, 1, 0]
         cvs = set([])

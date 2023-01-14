@@ -2,7 +2,7 @@ from blbmgr import BlbManager
 from center import Center
 from branch import Branch
 from blockchecker import BlockChecker
-from sat2.pathnode import PathNode
+from sat2.node2sat import Node2Sat
 
 
 def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
@@ -72,7 +72,7 @@ class Tail:
                 d = self.vk2dic[kn].dic
                 dics[chv][kn] = d.copy()
         for chv, dic in dics.items():
-            pn = PathNode(None, dic)
+            pn = Node2Sat(None, dic)
             if not pn.done:
                 pn.split_me()
             pn.include_wildbits()

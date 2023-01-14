@@ -1,3 +1,7 @@
+## 2023-01-14->0.382
+- layer.py
+## 2023-01-09->0.381
+- refactor and fixes.
 ## 2023-01-05->0.380
 - take from solver16 -> solver17
 - 2sat: solve 2sat with backtracking in 2sat/solve2.py

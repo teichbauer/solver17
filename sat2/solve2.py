@@ -3,7 +3,7 @@
 # solving 2sat with bit-splitting method
 # ----------------------------------------
 import os
-from pathnode import PathNode
+from sat2.node2sat import Node2Sat
 from lib2 import output_dic
 
 if __name__ == '__main__':
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     
     data = open(filename).read()
     TestKlauses = eval(data)
-    pn = PathNode(None, TestKlauses)
+    pn = Node2Sat(None, TestKlauses)
     print(f"\n2SAT clauses from file {fname}:")
     pn.output_clauses()
 

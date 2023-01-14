@@ -2,7 +2,7 @@ from sat2.clause import Clause
 from sat2.lib2 import output_dic, output_clause, expand_wildcard
 import os
 
-class PathNode:
+class Node2Sat:
     # klauses: [(C2, C3), (¬C3, C4), (C2, C4), (¬C1, ¬C2), (¬C3, C1)] =>
     # C3 -> 2:0, ¬C2 -> 1:1
     # [{1:0,2:0}, {2:1, 3:0}, {1:0, 3:0}, {0:1, 1:1}, {2:1, 0:0}]
@@ -31,33 +31,33 @@ class PathNode:
         if len(klauses) == 0:
             self.done = True
             if not self.stop:
-                self.solution_sats.append(self.sats)
+                self.solution_sats.append(self.fill_wbits(self.sats))
             return
         if len(klauses) == 1:
-            name, dic = tuple(klauses)[0]  # klauses has only 1 (name,dic)
+            name, dic = tuple(klauses.items())[0]  # klauses has only 1 (name,dic)
             cl = Clause(name, dic)
             slst = cl.sats()
             for s in slst:
                 sat = self.sats.copy()
                 sat.update(s)
-                self.solution_sats.append(sat)
+                self.solution_sats.append(self.fill_wbits(sat))
             self.bitkdic = {bit: [name] for bit in cl.bits}
             self.done = True
             return
         self.done = False
         self.clauses = {}
         
-
         for name, dic in klauses.items():
             for bit in dic:
                 self.bitkdic.setdefault(bit,set()).add(name)
             self.clauses[name] = Clause(name, dic)
         x = 1
     
-    def output_clauses(self):
-        print(f"Clauses:")
-        for cl in self.clauses.values():
-            print(output_clause(cl))
+    def fill_wbits(self, sat):
+        wbits = set(self.bitkdic) - set(sat)
+        if len(wbits) > 0:
+            sat.update({'wbs': wbits})
+        return sat
             
     def add_sats(self, sats):
         # if sats has a conflict with self.sats (same bit, diff bit-value)
@@ -146,8 +146,8 @@ class PathNode:
                 # klause not touched, put it into pn0 and pn1
                 pn0_clauses[kn] = k.dic.copy()
                 pn1_clauses[kn] = k.dic.copy()
-        child0 = PathNode(self, pn0_clauses, pn0_sats)
-        child1 = PathNode(self, pn1_clauses, pn1_sats)
+        child0 = Node2Sat(self, pn0_clauses, pn0_sats)
+        child1 = Node2Sat(self, pn1_clauses, pn1_sats)
         
         self.children = (child0, child1)
         for ch in self.children:
