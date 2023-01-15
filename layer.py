@@ -3,16 +3,17 @@ from sat2.node2sat import Node2Sat
 class Layer:
     def __init__(self, tail):
         self.tail = tail
+        self.base_bits = tail.bgrid.bitset
         self.cv_sats = {
             v:tail.bgrid.grid_sat(v) for v in tail.bgrid.chvset
         }
-        self.tail_chvclauses(tail)
+        self.set_cv_2sat(tail)
 
-    def tail_chvclauses(self, tail):
+    def set_cv_2sat(self, tail):
         chv_cldict = {}  # cls keyed by chv
         key_cldict = {}  # cl keyed by key(tail.cvks_dic)
 
-        for chv in tail.bgrid.chvset:
+        for chv in self.cv_sats:
             if len(tail.cvks_dic[chv]) == 0:
                 chv_cldict[chv] = None
                 continue
@@ -27,4 +28,13 @@ class Layer:
                 pn.split_me()
                 key_cldict[key] = pn
                 chv_cldict[chv] = key_cldict[key]
-        self.chvclauses = chv_cldict    
+        self.cv_cldict = chv_cldict
+
+    def cvsats(self, cv):
+        sat = self.cv_sats[cv].copy()
+        if self.cv_cldict[cv]:
+            ss = self.cv_cldict[cv].solution_sats[0]
+            sat.update(ss)
+        return sat
+
+
