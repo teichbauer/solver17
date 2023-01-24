@@ -18,19 +18,20 @@ class Node2Sat:
         # child node first clone sat from parent
         if parent:
             self.sats = parent.sats.copy() 
-            self.solution_sats = parent.solution_sats 
+            self.solution_sats = parent.solution_sats.copy()
         else:
             self.solution_sats = []
             self.sats = {}
         if parent:
             # add the given sats to the sat cloned from parent.
             # this may have conflict: results in False, causing stop = True
-            self.stop = sats == None or (not self.add_sats(sats))
-            if self.stop:
+            self.conflict = sats == None or (not self.add_sats(sats))
+            if self.conflict:
+                self.solution_sats = None
                 return
         if len(klauses) == 0:
             self.done = True
-            if not self.stop:
+            if not self.conflict:
                 self.solution_sats.append(self.fill_wbits(self.sats))
             return
         if len(klauses) == 1:
@@ -54,6 +55,7 @@ class Node2Sat:
         x = 1
     
     def fill_wbits(self, sat):
+        # any bit b in self.bitkdic not in sat, sat['wbs'].append(b)
         wbits = set(self.bitkdic) - set(sat)
         if len(wbits) > 0:
             sat.update({'wbs': wbits})
@@ -71,7 +73,43 @@ class Node2Sat:
                 self.sats[bit] = bv
         return True
 
+    def add_clause(self, k2): # add a 2-sat clause (sat2.clause/Clause)
+        obits = set(self.sats).intersection(k2.bits)
+        len_obits = len(obits)
+        if len_obits == 2:
+            self.conflict = not k2.verify(self.sats)
+            # if at lest one b in vk.bits: 
+            #    self.sats[b] != vk.dic[b]
+            # this vk can be omitted. - do not add it
+        elif len_obits == 1:
+            b = obits.pop()
+            ob = k2.other_bit(b)
+            if k2.dic[b] == self.sats[b]:
+                return self.add_sats({ob: k2.dic[ob]})
+            # if k2.dic[b] != self.sats[b], k2 not added
+        else: # k2 has no bit in self.sats
+            obits = set(self.bitkdic).intersection(k2.bits)
+            len_obits = len(obits)
+            if len_obits < 2:
+                for b in obits:
+                    self.bitkdic.setdefault(b,[]).append(k2.name)
+            else: # len_obits == 2
+                for b in obits:
+                    for kn in self.bitkdic[b]:
+                        if self.clauses[kn].bits == k2.bits:
+                            res = self.clauses[kn].evaluate_overlap(k2)
+                            if type(res) == type({}):
+                                pass
+                            elif res == 1: # k2 to be added
+                                pass
+
+
+
+
+        
+
     def maxpopular_bit(self):
+        ''' find the bit where most vks sitting on '''
         bit = -1
         siz = 0
         for b, names in self.bitkdic.items():
@@ -99,22 +137,6 @@ class Node2Sat:
                     s[b] = 2
                 solsats.append(s)
         self.solution_sats = solsats
-
-    def verify(self):
-        if len(self.solution_sats) == 0: 
-            print("There exists no sat")
-            return
-        expanded_sats = expand_wildcard(self.solution_sats)
-        for i in range(len(expanded_sats)):
-            sat = expanded_sats[i]
-            print(f"\nVerifying sat{i}: {output_dic(sat)}")
-
-            for cl in self.clauses.values():
-                res = cl.verify(sat)
-                if not res:
-                    print(f" {output_clause(cl)} - not verified.")
-                else:
-                    print(f" {output_clause(cl)} - verified.")
 
     def split_me(self):
         if self.done:
@@ -148,9 +170,27 @@ class Node2Sat:
                 pn1_clauses[kn] = k.dic.copy()
         child0 = Node2Sat(self, pn0_clauses, pn0_sats)
         child1 = Node2Sat(self, pn1_clauses, pn1_sats)
+        self.conflict = child0.conflict and child1.conflict
+        if self.conflict: return
         
         self.children = (child0, child1)
         for ch in self.children:
-            if ch.stop or ch.done:
+            if ch.conflict or ch.done:
                 continue
             ch.split_me()
+
+    def verify(self):
+        if len(self.solution_sats) == 0: 
+            print("There exists no sat")
+            return
+        expanded_sats = expand_wildcard(self.solution_sats)
+        for i in range(len(expanded_sats)):
+            sat = expanded_sats[i]
+            print(f"\nVerifying sat{i}: {output_dic(sat)}")
+
+            for cl in self.clauses.values():
+                res = cl.verify(sat)
+                if not res:
+                    print(f" {output_clause(cl)} - not verified.")
+                else:
+                    print(f" {output_clause(cl)} - verified.")

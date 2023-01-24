@@ -1,3 +1,7 @@
+## 2023-01-23->0.384
+- add method .evaluate_overlap to Clause, and other updates there
+- node2sat.add_clause: not yet done
+- other changes in layer, and pathfinder, lib2
 ## 2023-01-14->0.383
 - progress
 ## 2023-01-14->0.382

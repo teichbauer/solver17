@@ -22,18 +22,31 @@ class PathFinder:
 
 
     def find_candidates(self, layer):
-        sats_dic = layer.cvsats(2)
-        sbits = set(sats_dic)
+        candis = {}
         while True:
             nov = layer.tail.nov + 3
             if nov == Center.maxnov:
                 break
             ntail = self.branch.chain[nov]
-            overbits = sbits.intersection(ntail.bdic)
-            if len(overbits)> 0:
+            cv = 2
+            sat = layer.cvsats(cv)
+            sat_bits = set(sat)
+            obits = sat_bits.intersection(ntail.bdic)
+            if len(obits) > 0:
+                olayer = Layer(ntail)
+                if olayer:
+                    for ocv in ntail.bgrid.chvset:
+                        osats = olayer.cvsats(ocv)
+                        obs = obits.intersection(osats)
+                        if len(obs) > 0:
+                            res = self.sat_conflict(obs, sat, osats)
+                            x = 1
                 x = 9
         x = 0
-        # for cv in layer.cv_2sats:
-        #     sats_dic = layer.cvsats(cv)
 
-
+    def sat_conflict(self, obits, sat1, sat2):
+        for b in obits:
+            if b in sat1 and b in sat2:
+                if sat1[b] != sat2[b]:
+                    return False
+        return True

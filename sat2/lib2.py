@@ -31,7 +31,7 @@ def _get_bv(v, bit):
     x = v >> bit
     return x & 1
 
-def esxpand_bitcombo(bits):
+def expand_bitcombo(bits):
     # return a list of dics with 4 possible bit/bv combinations
     # example: bits = [2, 5]
     # output: [{2:0, 5:0}, {2:0, 5:1}, {2:1, 5:0}, {2:1, 5:1}, ]

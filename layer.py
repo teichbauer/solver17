@@ -7,7 +7,7 @@ class Layer:
         self.cv_sats = {
             v:tail.bgrid.grid_sat(v) for v in tail.bgrid.chvset
         }
-        self.set_cv_2sat(tail)
+        self.cv_cldict = self.set_cv_2sat(tail)
 
     def set_cv_2sat(self, tail):
         chv_cldict = {}  # cls keyed by chv
@@ -28,7 +28,8 @@ class Layer:
                 pn.split_me()
                 key_cldict[key] = pn
                 chv_cldict[chv] = key_cldict[key]
-        self.cv_cldict = chv_cldict
+        return chv_cldict
+        
 
     def cvsats(self, cv):
         sat = self.cv_sats[cv].copy()
@@ -36,5 +37,6 @@ class Layer:
             ss = self.cv_cldict[cv].solution_sats[0]
             sat.update(ss)
         return sat
+
 
 
