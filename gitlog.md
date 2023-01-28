@@ -1,3 +1,5 @@
+## 2023-01-27->0.385
+- progress
 ## 2023-01-23->0.384
 - add method .evaluate_overlap to Clause, and other updates there
 - node2sat.add_clause: not yet done

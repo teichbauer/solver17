@@ -13,7 +13,7 @@ class Node2Sat:
                 # sats can be 
                 # 1. None: split-sat conflict itself: this node is a stopper
                 # 2. sat resulted from split
-        self.bitkdic = {}  # {bit: set(name1, name2,..)}        
+        self.bitdic = {}  # {bit: set(name1, name2,..)}        
         self.parent = parent
         # child node first clone sat from parent
         if parent:
@@ -42,7 +42,7 @@ class Node2Sat:
                 sat = self.sats.copy()
                 sat.update(s)
                 self.solution_sats.append(self.fill_wbits(sat))
-            self.bitkdic = {bit: [name] for bit in cl.bits}
+            self.bitdic = {bit: [name] for bit in cl.bits}
             self.done = True
             return
         self.done = False
@@ -50,13 +50,13 @@ class Node2Sat:
         
         for name, dic in klauses.items():
             for bit in dic:
-                self.bitkdic.setdefault(bit,set()).add(name)
+                self.bitdic.setdefault(bit,set()).add(name)
             self.clauses[name] = Clause(name, dic)
         x = 1
     
     def fill_wbits(self, sat):
-        # any bit b in self.bitkdic not in sat, sat['wbs'].append(b)
-        wbits = set(self.bitkdic) - set(sat)
+        # any bit b in self.bitdic not in sat, sat['wbs'].append(b)
+        wbits = set(self.bitdic) - set(sat)
         if len(wbits) > 0:
             sat.update({'wbs': wbits})
         return sat
@@ -73,6 +73,11 @@ class Node2Sat:
                 self.sats[bit] = bv
         return True
 
+    def remove_clause(self, cl):
+        self.clauses.pop(cl.name)
+        for b in cl.bits:
+            self.bitdic[b].remove(cl.name)
+
     def add_clause(self, k2): # add a 2-sat clause (sat2.clause/Clause)
         obits = set(self.sats).intersection(k2.bits)
         len_obits = len(obits)
@@ -88,19 +93,24 @@ class Node2Sat:
                 return self.add_sats({ob: k2.dic[ob]})
             # if k2.dic[b] != self.sats[b], k2 not added
         else: # k2 has no bit in self.sats
-            obits = set(self.bitkdic).intersection(k2.bits)
+            obits = set(self.bitdic).intersection(k2.bits)
             len_obits = len(obits)
             if len_obits < 2:
                 for b in obits:
-                    self.bitkdic.setdefault(b,[]).append(k2.name)
+                    self.bitdic.setdefault(b,[]).append(k2.name)
             else: # len_obits == 2
                 for b in obits:
-                    for kn in self.bitkdic[b]:
+                    for kn in self.bitdic[b]:
                         if self.clauses[kn].bits == k2.bits:
                             res = self.clauses[kn].evaluate_overlap(k2)
-                            if type(res) == type({}):
-                                pass
+                            if type(res) == type({}): # 
+                                self.remove_clause(self.clauses[kn])
+                                if not self.add_sats(res):
+                                    self.conflict = True
                             elif res == 1: # k2 to be added
+                                for b in obits:
+                                    self.bitdic.setdefault(b,[]).append(k2.name)
+                            else:          # k2 not added
                                 pass
 
 
@@ -112,7 +122,7 @@ class Node2Sat:
         ''' find the bit where most vks sitting on '''
         bit = -1
         siz = 0
-        for b, names in self.bitkdic.items():
+        for b, names in self.bitdic.items():
             leng = len(names)
             if  leng > siz:
                 bit = b
@@ -124,7 +134,7 @@ class Node2Sat:
         for every missing bit in sat: bit(s) = (bits in map) - (sat-bits), 
         set  sat[bit] = 2
         '''
-        allbits = set(self.bitkdic)
+        allbits = set(self.bitdic)
         leng = len(allbits)
         solsats = []
         for sat in self.solution_sats:
