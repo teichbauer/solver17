@@ -1,3 +1,6 @@
+## 2023-02-15->0.386
+- new: cvnode2.py - class CVNode2
+- satnode: when constructing tail, collect sats and feed it to tail.node2s
 ## 2023-01-27->0.385
 - progress
 ## 2023-01-23->0.384

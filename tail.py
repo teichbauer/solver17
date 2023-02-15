@@ -2,7 +2,8 @@ from blbmgr import BlbManager
 from center import Center
 from branch import Branch
 from blockchecker import BlockChecker
-from sat2.node2sat import Node2Sat
+from cvnode2 import CVNode2
+from hashlib import md5
 
 
 def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
@@ -25,7 +26,7 @@ def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
     return t
 
 class Tail:
-    def __init__(self, bgrid, vk2dic, bitdic, block_bv_dic=None):
+    def __init__(self, bgrid, vk2dic, bitdic, n2sat_dic=None, block_bv_dic=None):
         self.bgrid = bgrid
         self.nov = bgrid.nov
         self.vk2dic = vk2dic
@@ -44,6 +45,7 @@ class Tail:
         if Center.root_branch == None:
             Center.root_branch = Branch(None)
         Center.root_branch.add_tail(self.nov, self)
+        self.generate_2sats(n2sat_dic)
 
     def sort_vks(self, vk2dic):
         self.cvks_dic = {v: set([]) for v in self.bgrid.chvset }
@@ -63,21 +65,28 @@ class Tail:
                     del self.bdic[b]
         return vk
     
-    def generate_2sats(self):
-        sat_dics = {}
-        dics = {}
+    def generate_2sats(self, sat_dic):
+        self.node2s = {}    # {<key>: cvnode2, ...}
+        self.cvn2s  = {}    # {<cv>: cvnode2(ref),.. }
         for chv in self.bgrid.chvset:
-            dics[chv] = {}
-            for kn in self.cvks_dic[chv]:
-                d = self.vk2dic[kn].dic
-                dics[chv][kn] = d.copy()
-        for chv, dic in dics.items():
-            pn = Node2Sat(None, dic)
-            if not pn.done:
-                pn.split_me()
-            pn.include_wildbits()
-            sat_dics[chv] = pn.solution_sats
-        self.pn2sat = sat_dics
+            m = md5()
+            m.update(str(sorted(self.cvks_dic[chv])).encode('utf-8'))
+            key = m.hexdigest()
+            if key in self.node2s:
+                n2 = self.node2s[key]
+                n2.cvs.add(chv)
+            else:
+                n2 = CVNode2(self,chv)
+                self.node2s[key] = n2
+                if len(self.cvks_dic[chv]) == 0:
+                    n2.done = True
+                else:
+                    for kname in self.cvks_dic[chv]:
+                        n2.add_k2(kname, self.vk2dic[kname].dic)
+                self.cvn2s[chv] = n2
+            for tp_cvs in sat_dic:
+                if chv in tp_cvs:
+                    n2.add_sat(sat_dic[tp_cvs].copy())
         x = 0
 
     def clone(self, split_sat_tpl):

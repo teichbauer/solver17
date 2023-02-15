@@ -7,22 +7,23 @@ class Clause:
         self.dic = dic
 
     def other_bit(self, b):
+        ''' Only for vk with 2 bits: return the other bit '''
         if b in self.bits:
             bits = self.bits[:]
             bits.remove(b)
             return bits[0]
         return None
 
-    def clone(self):  # if bit == -1: make a clone of self
-        return Clause(self.bits.copy(), self.dic.copy())
+    def clone(self):  
+        return Clause(self.name, self.dic.copy())
 
     def evaluate_overlap(self, cl):
-        ''' Only for the case of self.bits == cl.bits, if
-        1. self.dic == cl.dic - return 0
-        2. for 1 bit b self.dic[b] == cl.dic[b]  
-            - return a sat{b: self.dic[b]}
-        3. self.dic[b0] != cl.dic[b0] and self.dic[b1] != cl/dic[b1]
-            - return 1
+        ''' Only for vk2, and only for self.bits == cl.bits            
+            1. self.dic == cl.dic - return 0
+            2. if self.dic[b0] == cl.dic[b0] and  self.dic[b1] != cl.dic[b1]
+                - return a sat{b0: self.dic[b0]}
+            3. self.dic[b0] != cl.dic[b0] and self.dic[b1] != cl/dic[b1]
+                - return 1
         '''
         assert(self.bits == cl.bits), f"{self.name} and {cl.name} not overlap."
         b0, b1 = self.bits
@@ -37,11 +38,12 @@ class Clause:
         
     
     def sats(self):
+        # self.bits==[2,5] => [{2:0, 5:0}, {2:0, 5:1}, {2:1, 5:0}, {2:1, 5:1}]
         dics = expand_bitcombo(self.bits)
-        sats = []
-        for d in dics:
-            if d != self.dic:
-                sats.append(d)
+        sats = []                 # dics that are not covered by self.dic
+        for dic in dics:
+            if dic != self.dic:   # collect all that is not self.dic
+                sats.append(dic)  # into sats
         return sats
 
 
