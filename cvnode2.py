@@ -1,13 +1,17 @@
 from sat2.clause import Clause
 
-class CVNode2:
-    def __init__(self, tail, cv):
-        self.tail = tail
-        self.cvs = set([cv])
-        self.sat = {}
-        self.bitdic = {}   # {<bit>:[kname,...],..}
-        self.clauses = {}  # {<kname>: k2-clause,...}
-        self.done = False  # False, True, "conflict"
+class PathNode:
+    def __init__(self, sat=None, bitdic=None, clauses= None):
+        self.sat = sat if sat else {}
+        self.bitdic = bitdic if bitdic else {}     # {<bit>:[kname,...],..}
+        self.clauses = clauses if clauses else {}  # {<kname>: k2-clause,...}
+
+    def clone(self):
+        p = PathNode()
+        p.bitdic = self.bitdic.copy()
+        p.clauses = self.clauses.copy()
+        p.sat = self.sat.copy()
+        return p
 
     def add_k2(self, kname, k2dic):
         dic = k2dic.copy()
@@ -17,7 +21,7 @@ class CVNode2:
                 for kn in self.bitdic[bit]:
                     clx = self.clauses[kn]
                     if clx.bits == cl.bits:
-                        ev = cl.evaluate_overlap
+                        ev = cl.evaluate_overlap(clx)
                         if ev == 0:  # k2dic douplicates - don't add
                             return   # just return
                         self.sat.update(ev)
@@ -38,8 +42,7 @@ class CVNode2:
                 if self.sat[sbit] == sval:
                     continue
                 else:
-                    self.done = "conflict"
-                    return 
+                    return False # self.done = "conflict"
             else:
                 self.sat[sbit] = sval
             new_sat = {}
@@ -60,7 +63,30 @@ class CVNode2:
                         pass
 
                 del self.bitdic[sbit]
-            self.add_sat(new_sat)
+            return self.add_sat(new_sat)
+        return True
 
+class CVNode2(PathNode):
+    def __init__(self, tail, cv):
+        super().__init__()
+        self.tail = tail
+        self.cvs = set([cv])
+        self.done = False  # False, True, "conflict"
+
+    def add_sat(self, sat):
+        '''
+        a sat bit:value pair like {5:1} means: the value on bit 5 must be 1,
+        othewise this will make F=()^()^.. fail. So, if a k2 has bit 5,
+        and: a): bv is 1 -> this ke can eliminate bit-5, k2 becomes sat-bit;
+        b), bv is 0 -> this k2 can be eliminated, the 5:1 makes it so.
+        '''
+        res = super().add_sat(sat)
+        if not res:
+            self.done = 'conflict'
+
+    def sat_dic(self, cv):
+        sdic = self.sat.copy()
+        sdic.update(self.tail.bgrid.cv_sats[cv])
+        return sdic
 
 

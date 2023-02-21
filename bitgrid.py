@@ -24,6 +24,11 @@ class BitGrid:
         chlst = [v for v in range(8) if v not in self.covers]
         # self.chvset = frozenset(chlst)
         self.chvset = set(chlst)
+        self.cv_sats = {}
+        for cv in chlst:
+            self.cv_sats[cv] = {
+                self.bits[b]: v for b, v in self.BDICS[cv].items()
+            }
 
     def bits_cvs(self, dic):
         '''
@@ -44,8 +49,9 @@ class BitGrid:
         cvs = cvs.difference(self.covers)
         return cvs
 
-    def grid_sat(self, val):
-        return {self.bits[b]: v for b, v in self.BDICS[val].items()}
+    def grid_sat(self, cv):
+        # return a copy of 3 bit/bv - sat for the given cv
+        return {self.bits[b]: v for b, v in self.BDICS[cv].items()}
 
     def hit(self, satdic):
         for avk in self.avks:

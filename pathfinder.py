@@ -1,6 +1,6 @@
 from center import Center
 from layer import Layer
-from sat2.node2sat import Node2Sat
+from millipede import Millipede
 
 class PathFinder:
     def __init__(self, branch):
@@ -14,11 +14,33 @@ class PathFinder:
 
 
     def find2sat_solutions(self):
-        nov = 24
-        tail = self.branch.chain[nov]
-        layer24 = Layer(tail)  # self.tail_chvclauses(tail)
-        self.find_candidates(layer24)
+        # for cvn2 in self.etail.node2s.values():
+        #     self.find_path(self.etail, cvn2)
+        tail = self.etail
+        mil = Millipede(self.etail)
+        while True:
+            nv = tail.nov + 3
+            if nv > Center.maxnov: return
+            ntail = self.branch.chain[nv]
+            mil.grow(ntail)
+            tail = ntail
         x = 1
+
+    def find_path(self, 
+                  ctail,  # current/starting-tail
+                  cvn2):  # cvnode2 looping thru ctail.node2s
+        nv = ctail.nov + 3
+        if nv > Center.maxnov: return
+        ntail = self.branch.chain[nv]
+        allbits = set(ntail.bdic)
+        for cv in cvn2.cvs:
+            cvsat = cvn2.sat_dic(cv)
+            bs = allbits.intersection(cvsat)
+            if len(bs) == 0:
+                continue
+            for b in bs:
+                x = 0
+        x = 0
 
     def collect_ocvs(self, bits, tail):
         '''

@@ -7,6 +7,7 @@ from hashlib import md5
 
 
 def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
+    '''
     #         vk2a         vk2b                 return
     #---------------------------------------------------
     # dic1:{ 11:0, 21:1}, dic2:{11:1, 21:1} -> {(21,1)}
@@ -15,6 +16,7 @@ def merge_vkpair(vk2a, vk2b): # vk2a and vk2b must have common-cvs
     # -------------------------------------
     # it should not be possible to have dict == dict:
     # dic1:{ 11:0, 21:1}, dic2:{11:0, 21:1} -> {(11,0),(21,1)} 
+    '''
     s1 = set(tuple(vk2a.dic.items()))
     s2 = set(tuple(vk2b.dic.items()))
     s = s1.intersection(s2)
@@ -47,7 +49,7 @@ class Tail:
         Center.root_branch.add_tail(self.nov, self)
         self.generate_2sats(n2sat_dic)
 
-    def sort_vks(self, vk2dic):
+    def sort_vks(self, vk2dic):  # fill self.cvks_dic
         self.cvks_dic = {v: set([]) for v in self.bgrid.chvset }
         # only care about vk2s. All vk1s will become sats
         for kn, vk in vk2dic.items():  
@@ -83,10 +85,11 @@ class Tail:
                 else:
                     for kname in self.cvks_dic[chv]:
                         n2.add_k2(kname, self.vk2dic[kname].dic)
-                self.cvn2s[chv] = n2
+            self.cvn2s[chv] = n2
             for tp_cvs in sat_dic:
                 if chv in tp_cvs:
-                    n2.add_sat(sat_dic[tp_cvs].copy())
+                    if not n2.add_sat(sat_dic[tp_cvs].copy()):
+                        n2.done = 'conflict'
         x = 0
 
     def clone(self, split_sat_tpl):

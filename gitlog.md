@@ -1,3 +1,7 @@
+## 2023-02-20->0.387
+- remove pathseg.py new: millipede.py
+- new PathNode class, both CVNode2 and Path inheriting from it
+- new: bitgrid.cv_sats
 ## 2023-02-15->0.386
 - new: cvnode2.py - class CVNode2
 - satnode: when constructing tail, collect sats and feed it to tail.node2s
