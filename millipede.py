@@ -1,41 +1,35 @@
-from cvnode2 import PathNode
-
-class Path(PathNode):
-    def __init__(self, name, sat, bitdic, clauses):
-        self.name = [name]
-        super().__init__(sat, bitdic.copy(), clauses.copy())
-
-    def clone(self):
-        p = super().clone()
-        p.name = self.name
-        return p
+from path import Path
 
 class Millipede:
-    def __init__(self, stail):  # starting-tail - nov:21
-        self.tails = [stail]
+    def __init__(self, end_tail):
+        self.etail = end_tail
         self.paths = {}
-        for cv in stail.cvks_dic:
+        self.setup()
+
+    def setup(self):
+        for cv in self.etail.cvks_dic:
             # if not stail.cvn2s[cv].done:
-            name = (stail.nov, cv)
-            n2 = stail.cvn2s[cv]
+            name = (self.etail.nov, cv)
+            n2 = self.etail.cvn2s[cv]
             self.paths[name] = Path(
-                name, 
-                stail.bgrid.cv_sats[cv],
+                name,
+                n2.sat_dic(cv),
                 n2.bitdic, 
                 n2.clauses)
+            x = 0
+        x = 1
 
     def grow(self, tail):
         npath = {}
-        while len(self.paths) > 0:
-            k, pth = self.paths.popitem()
-            for cv in tail.cvks_dic:
-                path = pth.clone()
-                path.name.append((tail.nov, cv))
-                n2 = tail.cvn2s[cv]
-                path.add_sat(n2.sat)
-                for kn, cl in n2.clauses.items():
-                    path.add_k2(kn, cl.dic)
-                npath[path.name] = path
+        for pth in self.paths.values():
+            sat, bdic, cls = pth.sat, pth.bitdic, pth.clauses
+            for xn2 in tail.node2s.values():
+                for cv in xn2.cvs:
+                    p = Path((pth.name,(tail.nov, cv)), sat, bdic, cls)
+                    res = p.add_n2(xn2, cv)
+                    if not res:
+                        continue
+                    npath[p.name] = p
         self.paths = npath
 
 

@@ -1,3 +1,5 @@
+## 2023-02-22->0.388
+- new: path.py, pathnode.py, pathfinder.py, millipede.py
 ## 2023-02-20->0.387
 - remove pathseg.py new: millipede.py
 - new PathNode class, both CVNode2 and Path inheriting from it

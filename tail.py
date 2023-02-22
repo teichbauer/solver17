@@ -47,7 +47,8 @@ class Tail:
         if Center.root_branch == None:
             Center.root_branch = Branch(None)
         Center.root_branch.add_tail(self.nov, self)
-        self.generate_2sats(n2sat_dic)
+        # generate: self.node2s and self.cvn2s
+        self.generate_n2s(n2sat_dic)
 
     def sort_vks(self, vk2dic):  # fill self.cvks_dic
         self.cvks_dic = {v: set([]) for v in self.bgrid.chvset }
@@ -67,7 +68,7 @@ class Tail:
                     del self.bdic[b]
         return vk
     
-    def generate_2sats(self, sat_dic):
+    def generate_n2s(self, sat_dic):
         self.node2s = {}    # {<key>: cvnode2, ...}
         self.cvn2s  = {}    # {<cv>: cvnode2(ref),.. }
         for chv in self.bgrid.chvset:

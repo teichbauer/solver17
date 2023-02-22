@@ -2,6 +2,7 @@ from basics import verify_sat
 
 class Center:
     maxnov = 0
+    minnov = 0
     bodybits = set([])  # every snode has 3x <sat-bit>:<snode> in here
     bits = set([])
     sats = []

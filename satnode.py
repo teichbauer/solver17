@@ -120,7 +120,7 @@ class SatNode:
                 Center.add_blocks(nv, tail.bchecker)
                 nv -= 3
             pfinder = PathFinder(Center.root_branch)
-            pfinder.find2sat_solutions()
+            pfinder.find_solutions()
             # Center.root_branch.split()
             x = 1
 
