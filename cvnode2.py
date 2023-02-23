@@ -6,6 +6,7 @@ class CVNode2(PathNode):
         self.tail = tail
         self.cvs = set([cv])
         self.done = False  # False, True, "conflict"
+        self.lower_blocks = set()
 
     def add_sat(self, sat):
         '''
@@ -17,6 +18,7 @@ class CVNode2(PathNode):
         res = super().add_sat(sat)
         if not res:
             self.done = 'conflict'
+        return True
 
     def sat_dic(self, cv):
         sdic = self.sat.copy()

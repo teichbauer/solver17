@@ -1,4 +1,4 @@
-from basics import set_bit
+from basics import set_bit, get_bit
 from vklause import VKlause
 
 
@@ -48,6 +48,23 @@ class BitGrid:
         cvs = self.vary_bits(v, g, cvs)
         cvs = cvs.difference(self.covers)
         return cvs
+
+    def bv2cvs(self, b, v):
+        ''' for bit: [54, 50, 11], (b,v):(50,1) will get:
+        010 / cv:2  - {54:0, 50:1, 11:0}
+        011 / cv:3  - {54:0, 50:1, 11:1}
+        110 / cv:6  - {54:1, 50:1, 11:0}
+        111 / cv:7  - {54:1, 50:1, 11:1}
+        return cvs:(2,3,6,7); if avk.v is 3, take it out, getting: (2,6,7)
+        '''
+        if b not in self.bits: return None
+        ind = self.bits.index(b)
+        cvs = []
+        for cv in self.chvset:
+            if get_bit(cv, ind) == v:
+                cvs.append(cv)
+        return cvs
+
 
     def grid_sat(self, cv):
         # return a copy of 3 bit/bv - sat for the given cv

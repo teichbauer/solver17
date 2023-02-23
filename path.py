@@ -5,10 +5,12 @@ class Path(PathNode):
         self.name = name
         # from super/PathNode:
         #   .sat
-        #   .bitdic
+        #   .bitdic - {<bit>:set{kn,kn,..}, <bit>:set{}, ...}
         #   .clauses
         # -------------------------
-        super().__init__(sat.copy(), bitdic.copy(), clauses.copy())
+        # bdic: deeper copy of bitdic than bitdic.copy():
+        bdic = {b:s.copy() for b, s in bitdic.items()}
+        super().__init__(sat.copy(), bdic, clauses.copy())
 
     # def get_leg(self, name):
     #     return self.sat, self.bitdic, self.clauses
@@ -22,7 +24,7 @@ class Path(PathNode):
         if not self.add_sat(sat):
             return False
         else:
-            for kn, cl in n2.clauses.items():
-                if not self.add_k2(kn, cl.dic):
+            for cl in n2.clauses.values():
+                if not self.add_k2(cl):
                     return False
             return True

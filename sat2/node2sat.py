@@ -74,9 +74,9 @@ class Node2Sat:
         return True
 
     def remove_clause(self, cl):
-        self.clauses.pop(cl.name)
+        self.clauses.pop(cl.kname)
         for b in cl.bits:
-            self.bitdic[b].remove(cl.name)
+            self.bitdic[b].remove(cl.kname)
 
     def add_clause(self, k2): # add a 2-sat clause (sat2.clause/Clause)
         obits = set(self.sats).intersection(k2.bits)
@@ -97,7 +97,7 @@ class Node2Sat:
             len_obits = len(obits)
             if len_obits < 2:
                 for b in obits:
-                    self.bitdic.setdefault(b,[]).append(k2.name)
+                    self.bitdic.setdefault(b,[]).append(k2.kname)
             else: # len_obits == 2
                 for b in obits:
                     for kn in self.bitdic[b]:
@@ -109,7 +109,7 @@ class Node2Sat:
                                     self.conflict = True
                             elif res == 1: # k2 to be added
                                 for b in obits:
-                                    self.bitdic.setdefault(b,[]).append(k2.name)
+                                    self.bitdic.setdefault(b,[]).append(k2.kname)
                             else:          # k2 not added
                                 pass
 

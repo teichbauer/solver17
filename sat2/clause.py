@@ -2,7 +2,7 @@ from sat2.lib2 import expand_bitcombo
 
 class Clause:
     def __init__(self, name, dic):
-        self.name = name
+        self.kname = name
         self.bits = sorted(dic)
         self.dic = dic
 
@@ -15,7 +15,7 @@ class Clause:
         return None
 
     def clone(self):  
-        return Clause(self.name, self.dic.copy())
+        return Clause(self.kname, self.dic.copy())
 
     def evaluate_overlap(self, cl):
         ''' Only for vk2, and only for self.bits == cl.bits            
@@ -25,7 +25,7 @@ class Clause:
             3. self.dic[b0] != cl.dic[b0] and self.dic[b1] != cl/dic[b1]
                 - return 1
         '''
-        assert(self.bits == cl.bits), f"{self.name} and {cl.name} not overlap."
+        assert(self.bits == cl.bits),f"{self.kname} and {cl.kname} not overlap."
         b0, b1 = self.bits
         if self.dic[b0] == cl.dic[b0]:
             if self.dic[b1] == cl.dic[b1]:
@@ -51,8 +51,8 @@ class Clause:
         if set(self.bits).issubset(set(sats)):
             b0, b1 = self.bits
             if self.dic[b0] == sats[b0] and self.dic[b1] == sats[b1]:
-                print(f"{self.name} = hit(False)")
+                print(f"{self.kname} = hit(False)")
                 return False
             return True
-        raise Exception(f"{self.name} not in sat")
+        raise Exception(f"{self.kname} not in sat")
 

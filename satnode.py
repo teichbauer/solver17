@@ -26,7 +26,7 @@ class SatNode:
 
     def split_vkm(self):
         
-        Center.bodybits |=  self.bgrid.bitset
+        Center.headbits[self.nov] =  self.bgrid.bitset
         self.chdic = {}
 
         bdic = Center.sumbdic.setdefault(self.nov, {})

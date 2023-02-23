@@ -1,3 +1,13 @@
+## 2023-02-23->0.389
+- bitgrid: new method: bv2cvs
+- Center.bodybits renamed to headbits, it is now a dict of {<nov>:{bits},..}
+- CNNode2: self.lower_blocks set{}
+- fixes in path
+- pathfinder/downward_blocker set all cvnode2 for dowward-blocks, if it 
+  has sat, and bit(s) in sat sit on lower tail's head
+- pathnode/add_k2 now takes just vk/cl, no more kname and dic
+- clause (k2) name ->kname, to be compatible with vklause
+- millipede: some progress
 ## 2023-02-22->0.388
 - new: path.py, pathnode.py, pathfinder.py, millipede.py
 ## 2023-02-20->0.387

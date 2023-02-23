@@ -9,7 +9,7 @@ def output_dic(sat_dic):
     return m
 
 def output_clause(clause):
-    m = "  " + clause.name +': {'
+    m = "  " + clause.kname +': {'
     m += f" {clause.bits[0]}:{clause.dic[clause.bits[0]]}, "
     m += f"{clause.bits[1]}:{clause.dic[clause.bits[1]]} " + "}"
     return m

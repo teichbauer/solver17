@@ -49,6 +49,7 @@ class Tail:
         Center.root_branch.add_tail(self.nov, self)
         # generate: self.node2s and self.cvn2s
         self.generate_n2s(n2sat_dic)
+        self.lower_blockers = set()
 
     def sort_vks(self, vk2dic):  # fill self.cvks_dic
         self.cvks_dic = {v: set([]) for v in self.bgrid.chvset }
@@ -85,7 +86,7 @@ class Tail:
                     n2.done = True
                 else:
                     for kname in self.cvks_dic[chv]:
-                        n2.add_k2(kname, self.vk2dic[kname].dic)
+                        n2.add_k2(self.vk2dic[kname])
             self.cvn2s[chv] = n2
             for tp_cvs in sat_dic:
                 if chv in tp_cvs:

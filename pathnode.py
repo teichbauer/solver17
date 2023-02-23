@@ -3,7 +3,7 @@ from sat2.clause import Clause
 class PathNode:
     def __init__(self, sat=None, bitdic=None, clauses= None):
         self.sat = sat if sat else {}
-        self.bitdic = bitdic if bitdic else {}     # {<bit>:[kname,...],..}
+        self.bitdic = bitdic if bitdic else {}     # {<bit>:set{kname,...},..}
         self.clauses = clauses if clauses else {}  # {<kname>: k2-clause,...}
 
     def clone(self):
@@ -13,24 +13,41 @@ class PathNode:
         p.sat = self.sat.copy()
         return p
 
-    def add_k2(self, kname, k2dic):
-        dic = k2dic.copy()
-        cl = Clause(kname, dic)
-        for bit in dic:
-            if bit in self.bitdic:
-                for kn in self.bitdic[bit]:
-                    clx = self.clauses[kn]
-                    if clx.bits == cl.bits:
-                        ev = cl.evaluate_overlap(clx)
-                        if ev == 0:  # k2dic douplicates - don't add
-                            return   # just return
-                        if ev != 1:  # ev is a new sat
-                            if not self.add_sat(ev):
-                                return False
-                        self.sat.update(ev)
-                        return True
-            self.bitdic.setdefault(bit, set()).add(kname)
-        self.clauses[kname] = cl
+    def add_k2(self, vk):  # vk can be clause, or vklause
+        dic = vk.dic.copy()
+        dicbits = set(dic)
+        touch = dicbits.intersection(self.sat)
+        if len(touch) > 0:
+            b = touch.pop()
+            if dic[b] == self.sat[b]:
+                dic.pop(b)
+                sbit, sval = dic.popitem()
+                return self.add_sat({sbit: int(not sval)})
+            else:
+                return True
+        touch = dicbits.intersection(self.bitdic)
+        cl = Clause(vk.kname, dic)
+        if len(touch) == 0:
+            for bit in dicbits:
+                self.bitdic.setdefault(bit, set()).add(vk.kname)
+        else:
+            for bit in dicbits:
+                if bit in self.bitdic:
+                    kns = self.bitdic[bit].copy()
+                    for kn in kns:
+                        clx = self.clauses[kn]
+                        if clx.bits == cl.bits:
+                            ev = cl.evaluate_overlap(clx)
+                            if ev == 0:  # k2dic douplicates - don't add
+                                return   # just return
+                            if ev != 1:  # ev is a new sat
+                                b, v = ev.popitem()
+                                if not self.add_sat({b: int(not v)}):
+                                    return False
+                            self.sat.update(ev)
+                            return True
+                self.bitdic.setdefault(bit, set()).add(vk.kname)
+        self.clauses[vk.kname] = cl
         return True
 
     def add_sat(self, sat):

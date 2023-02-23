@@ -3,7 +3,7 @@ from basics import verify_sat
 class Center:
     maxnov = 0
     minnov = 0
-    bodybits = set([])  # every snode has 3x <sat-bit>:<snode> in here
+    headbits = {}  # {<nov>:(3 bits)}
     bits = set([])
     sats = []
     limit = 10
