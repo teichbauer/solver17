@@ -40,8 +40,11 @@ class Millipede:
     def grow(self, higher_tail):
         npath = {}
         for pth in self.paths.values():
+            name_set = set(pth.name)
             sat, bdic, cls = pth.sat, pth.bitdic, pth.clauses
-            for kcv, xn2 in higher_tail.node2s.items():
+            for xn2 in higher_tail.node2s.values():
+                if name_set.intersection(xn2.lower_blocks):
+                    continue
                 for cv in xn2.cvs:
                     if type(pth.name[0]) == tuple:
                         name = pth.name + ((higher_tail.nov, cv),)

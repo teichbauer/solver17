@@ -14,15 +14,32 @@ class PathFinder:
         for nov in self.branch.novs:
             tail = self.branch.chain[nov]
             for cvn2 in tail.node2s.values():
-                for b, v in cvn2.sat.items():
-                    nv = nov -3
-                    while nv >= Center.minnov:
-                        if b in Center.headbits[nv]:
-                            t = self.branch.chain[nv]
-                            cvs = t.bgrid.bv2cvs(b,v)
+                nv = nov -3
+                while nv >= Center.minnov:
+                    t = self.branch.chain[nv]
+                    head = t.bgrid.bitset
+                    for b, v in cvn2.sat.items():
+                        if b in head:
+                            cvs = t.bgrid.bv2cvs(b,int(not v))
                             for cv in cvs:
                                 cvn2.lower_blocks.add((t.nov, cv))
-                        nv = nv - 3
+                    # heads of lower tail.cvn2s piercing into cvn2.bitdic
+                    xbits = head.intersection(cvn2.bitdic)
+                    if xbits:
+                        for tcv, tcvn2 in t.cvn2s.items():
+                            xcvn2 = cvn2.clone()
+                            sat = t.bgrid.grid_sat(tcv).copy()
+                            if not xcvn2.add_sat(sat):
+                                x = 0
+                            else:
+                                x = 0
+                            if xcvn2.add_cvn2(tcvn2):
+                                x = 8
+                            else:
+                                x = 0
+                        x = 9
+                    nv = nv - 3
+
                 x = 0
             x = 9
         x = 9

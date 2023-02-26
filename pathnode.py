@@ -8,7 +8,7 @@ class PathNode:
 
     def clone(self):
         p = PathNode()
-        p.bitdic = self.bitdic.copy()
+        p.bitdic = {b:s.copy() for b, s in self.bitdic.items() }
         p.clauses = self.clauses.copy()
         p.sat = self.sat.copy()
         return p
@@ -38,8 +38,8 @@ class PathNode:
                         clx = self.clauses[kn]
                         if clx.bits == cl.bits:
                             ev = cl.evaluate_overlap(clx)
-                            if ev == 0:  # k2dic douplicates - don't add
-                                return   # just return
+                            if ev == 0:      # k2dic douplicates - don't add
+                                return True  # still return True
                             if ev != 1:  # ev is a new sat
                                 b, v = ev.popitem()
                                 if not self.add_sat({b: int(not v)}):
@@ -67,23 +67,23 @@ class PathNode:
             else:
                 self.sat[sbit] = sval
             new_sat = {}
-            if sbit in self.bitdic:
-                while len(self.bitdic[sbit]) > 0:
-                    kn = self.bitdic[sbit].pop()
-                    cl = self.clauses.pop(kn)  # cl is no more in self.clauses
-                    obit = cl.other_bit(sbit)
+            while sbit in self.bitdic:
+                kn = self.bitdic[sbit].pop()
+                if len(self.bitdic[sbit]) == 0:
+                    del self.bitdic[sbit]
+                cl = self.clauses.pop(kn)  # cl is no more in self.clauses
+                obit = cl.other_bit(sbit)
 
-                    # clear cl's obit from bitdic
-                    self.bitdic[obit].pop(kn)
-                    if len(self.bitdic[obit]) == 0:
-                        del self.bitdic[obit]
+                # clear cl's obit from bitdic
+                if obit in self.bitdic:
+                    self.bitdic[obit].remove(kn)
+                if len(self.bitdic[obit]) == 0:
+                    del self.bitdic[obit]
 
-                    if cl.dic[sbit] == sval:
-                        new_sat[obit] = int(not cl.dic[obit])
-                    else:
-                        pass
-
-                del self.bitdic[sbit]
+                if cl.dic[sbit] == sval:
+                    new_sat[obit] = int(not cl.dic[obit])
+                else:
+                    pass
             res = self.add_sat(new_sat)
             if not res:
                 return False
