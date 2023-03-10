@@ -32,7 +32,6 @@ class Branch:
         return bit
 
     def split(self):
-        # self.get_splitbit()
         sbit = self.get_bestbit() 
         ssat0_tpl = (sbit, 0)  # { sbit: 0 }
         ssat1_tpl = (sbit, 1)  # { sbit: 1 }
@@ -49,9 +48,6 @@ class Branch:
         # t=(21,0), dict((t,)) -> {21:0}
         b0.sat.update(dict((ssat0_tpl,)))
         x = 0
-        # chain0 = self.clone_chain(ssat0, sbit)
-        # for nv, tail in chain0.items():
-        #     b0.add_tail(nv, tail)
 
         return b0, b1
     

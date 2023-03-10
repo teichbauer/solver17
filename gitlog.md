@@ -1,3 +1,12 @@
+## 2023-03-10->0.391
+- got rid of layer.py, vk2pkg.py
+- new: cluster.py
+- pathfinder: calc 60-57, 54-51, 48-45, 42-39, 36-33, 30-27, 24-21
+  each will have 49 merged clusters
+- recoded pathnode/add_k2
+## 2023-02-25->0.390
+- fixes in cvnode2
+- progress in pathfinder/down_blocker
 ## 2023-02-23->0.389
 - bitgrid: new method: bv2cvs
 - Center.bodybits renamed to headbits, it is now a dict of {<nov>:{bits},..}

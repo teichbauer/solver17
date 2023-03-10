@@ -1,5 +1,6 @@
 from center import Center
 from millipede import Millipede
+from cluster import Cluster
 
 class PathFinder:
     def __init__(self, branch):
@@ -8,7 +9,25 @@ class PathFinder:
         self.sat = branch.sat
         end_tail = branch.chain[Center.minnov]  # end-tail
         self.millipede = Millipede(end_tail)
-        self.downward_blocker()
+        self.clusters = Cluster.cluster_dic
+        # self.downward_blocker()
+        start_tail = branch.chain[Center.maxnov]
+        self.grow_cluster(start_tail)
+
+    def grow_cluster(self, tail):
+        while tail.nov > Center.minnov:
+            if tail.nov >= Center.minnov + 3:
+                ntail = self.branch.chain[tail.nov - 3]
+
+                for cv, cvn2 in tail.cvn2s.items():
+                    cluster = Cluster((tail.nov,cv), cvn2)
+                    # grow cluster between (tail, ntail)
+                    cluster.grow(ntail)
+                tail = self.branch.chain[ntail.nov - 3]
+            else:
+                # TBD
+                cluster = Cluster((),None)
+
 
     def downward_blocker(self):
         for nov in self.branch.novs:
@@ -29,11 +48,16 @@ class PathFinder:
                         for tcv, tcvn2 in t.cvn2s.items():
                             xcvn2 = cvn2.clone()
                             sat = t.bgrid.grid_sat(tcv).copy()
+                            # new_sat = {}
+                            # if not xcvn2.add_sat(sat, new_sat):
                             if not xcvn2.add_sat(sat):
                                 x = 0
                             else:
-                                x = 0
+                                pass
+                                # if len(new_sat) > 0:
+                                #     x = 8
                             if xcvn2.add_cvn2(tcvn2):
+
                                 x = 8
                             else:
                                 x = 0

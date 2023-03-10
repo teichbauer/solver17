@@ -27,26 +27,40 @@ class PathNode:
                 return True
         touch = dicbits.intersection(self.bitdic)
         cl = Clause(vk.kname, dic)
-        if len(touch) == 0:
+
+        if len(touch) == 2:   # 2 bits in self.bitdic
+            # collect kns that share 1 or 2 bit
+            kns = set()
             for bit in dicbits:
-                self.bitdic.setdefault(bit, set()).add(vk.kname)
-        else:
-            for bit in dicbits:
-                if bit in self.bitdic:
-                    kns = self.bitdic[bit].copy()
-                    for kn in kns:
-                        clx = self.clauses[kn]
-                        if clx.bits == cl.bits:
-                            ev = cl.evaluate_overlap(clx)
-                            if ev == 0:      # k2dic douplicates - don't add
-                                return True  # still return True
-                            if ev != 1:  # ev is a new sat
-                                b, v = ev.popitem()
-                                if not self.add_sat({b: int(not v)}):
-                                    return False
-                            self.sat.update(ev)
-                            return True
-                self.bitdic.setdefault(bit, set()).add(vk.kname)
+                for kn in self.bitdic[bit]:
+                    kns.add(kn)
+            # vk(kn) with shares 2 bit as cl: -> dkns
+            dkns = set()
+            while len(kns) > 0:
+                kn = kns.pop()
+                if self.clauses[kn].bits == cl.bits:
+                    dkns.add(kn)
+            # among dkns, find kn's ev
+            sat_added = False
+            for kn in dkns:
+                clx = self.clauses[kn]
+                ev = cl.evaluate_overlap(clx)
+                # vk has a duplicate (ev == 0): dont add it, stop here 
+                if ev == 0: return True  
+                # ev != 1 : ev is a dic
+                if ev != 1: 
+                    sat_added = True  # vk becomes a new sat that is now added
+                    b, v = ev.popitem()
+                    res = self.add_sat({b: int(not v)})
+                    if not res: 
+                        return False  # conflict: return False
+                    # if there is no conflict, go to next kn in dkns
+                # in case ev == 1, vk is not entangled, add it in the following
+            # if vk added as a new sat, return True
+            if sat_added: return True
+
+        for bit in dicbits:
+            self.bitdic.setdefault(bit, set()).add(vk.kname)
         self.clauses[vk.kname] = cl
         return True
 
@@ -82,6 +96,7 @@ class PathNode:
 
                 if cl.dic[sbit] == sval:
                     new_sat[obit] = int(not cl.dic[obit])
+                    # news[obit] = new_sat[obit]
                 else:
                     pass
             res = self.add_sat(new_sat)
