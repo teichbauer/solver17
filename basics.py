@@ -111,6 +111,12 @@ def vkdic_remove(vkdic, kns):
             kd[kn] = vk
     return kd
 
+def sortdic(d):
+    ks = sorted(d)
+    dd = {}
+    for k in ks:
+       dd[k] = d[k]
+    return dd
 
 def display_vkdic(vkd, title=None, outfile=None):
     kns = list(vkd.keys())

@@ -3,10 +3,12 @@ from pathnode import PathNode
 
 class Cluster(PathNode):
     cluster_dic = {}
+    groups = {}
 
     def __init__(self, name, n2node):
         self.name = name
         self.n2 = n2node
+        self.nov = n2node.tail.nov
         bdic = {b:s.copy() for b, s in n2node.bitdic.items()}
         super().__init__(n2node.sat.copy(), bdic, n2node.clauses.copy())
         self.add_sat(n2node.sat_dic(name[1]))
@@ -31,16 +33,24 @@ class Cluster(PathNode):
                 x = 9
             if not self.add_k2(cl):
                 return None
-        Cluster.cluster_dic[tuple(self.name)] = self
+        name = tuple(self.name)
+        self.set_bsatbits(n2)
+        Cluster.cluster_dic[name] = self
+        Cluster.groups.setdefault(self.nov, []).append((name,self))
         return self
-        
+
+    def delta_sat(self):
+        bits = set(self.sat) - self.bsatbits
+        dset = {b: self.sat[b] for b in bits}
+        return bits, dset
+
+    def set_bsatbits(self, lower_n2):
+        self.bsatbits = self.n2.tail.bgrid.bitset
+        self.bsatbits.update(lower_n2.tail.bgrid.bitset)
+
     def grow(self, lower_tail):
         for cv, cvn2 in lower_tail.cvn2s.items():
             clu = self.clone()
-            if self.name == (48,1) and cv == 3:
-                x = 9            
             res = clu.add_n2(cvn2, cv)
-            if res:
-                pass
         x = 0    
 

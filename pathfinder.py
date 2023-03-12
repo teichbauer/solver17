@@ -1,6 +1,7 @@
 from center import Center
 from millipede import Millipede
 from cluster import Cluster
+from basics import sortdic
 
 class PathFinder:
     def __init__(self, branch):
@@ -10,24 +11,46 @@ class PathFinder:
         end_tail = branch.chain[Center.minnov]  # end-tail
         self.millipede = Millipede(end_tail)
         self.clusters = Cluster.cluster_dic
-        # self.downward_blocker()
         start_tail = branch.chain[Center.maxnov]
         self.grow_cluster(start_tail)
+        self.downwards()
 
     def grow_cluster(self, tail):
-        while tail.nov > Center.minnov:
+        while tail.nov >= Center.minnov:
             if tail.nov >= Center.minnov + 3:
                 ntail = self.branch.chain[tail.nov - 3]
-
                 for cv, cvn2 in tail.cvn2s.items():
                     cluster = Cluster((tail.nov,cv), cvn2)
                     # grow cluster between (tail, ntail)
                     cluster.grow(ntail)
-                tail = self.branch.chain[ntail.nov - 3]
-            else:
-                # TBD
-                cluster = Cluster((),None)
+                if ntail.nov == Center.minnov:
+                    break
+                elif ntail.nov - 3 < Center.minnov:
+                    tail = self.branch.chain[Center.minnov]
+                else:
+                    tail = self.branch.chain[ntail.nov - 3]
+        # msg = self.cluster_sat(24)
+        x = 8
 
+    def downwards(self):
+        nov = Center.maxnov
+        while nov in Cluster.groups:
+            group = Cluster.groups[nov]
+            #nov: 60, 54, ...
+            for name, cluster in group:
+                # name:((60,1),(57,2)),cl: cluster.name == name
+                nv = nov - 6
+                dsbits, dsat = cluster.delta_sat()
+                while nv in Cluster.groups:
+                    for nam, cl in Cluster.groups[nv]:
+                        ibits = dsbits.intersection(cl.sat)
+                        while len(ibits) > 0:
+                            idic = {b: dsat[b] for b in ibits}
+                            x = 9
+                        x = 0
+                    nv -= 6
+                x = 0
+            nov -= 6
 
     def downward_blocker(self):
         for nov in self.branch.novs:
@@ -67,6 +90,12 @@ class PathFinder:
                 x = 0
             x = 9
         x = 9
+
+    def cluster_sat(self, gname):
+        msg = {}
+        for g in Cluster.groups[gname]:
+            name, satdic = g[0], sortdic(g[1].sat)
+            print(name, satdic)
 
     def find_solutions(self):
         # for cvn2 in self.etail.node2s.values():

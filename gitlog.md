@@ -1,3 +1,6 @@
+## 2023-03-11->0.392
+- PathFinder.downwars
+- progress in cluster
 ## 2023-03-10->0.391
 - got rid of layer.py, vk2pkg.py
 - new: cluster.py
