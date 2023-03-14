@@ -1,3 +1,6 @@
+## 2023-03-13->0.393
+- in cluster.py: self.tail1/tail2, blocker_set, test_sat
+- in pathfinder.py: downwards
 ## 2023-03-11->0.392
 - PathFinder.downwars
 - progress in cluster

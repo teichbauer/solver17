@@ -8,11 +8,12 @@ class Cluster(PathNode):
     def __init__(self, name, n2node):
         self.name = name
         self.n2 = n2node
+        self.tail1 = n2node.tail
         self.nov = n2node.tail.nov
         bdic = {b:s.copy() for b, s in n2node.bitdic.items()}
         super().__init__(n2node.sat.copy(), bdic, n2node.clauses.copy())
         self.add_sat(n2node.sat_dic(name[1]))
-        x = 0
+        self.blocker_set = set()
 
     def clone(self):
         c = Cluster(self.name, self.n2.clone())
@@ -25,6 +26,7 @@ class Cluster(PathNode):
             self.name = [self.name, (n2.tail.nov, n2cv)]
         else:
             self.name.append((n2.tail.nov, n2cv))
+        self.tail2 = n2.tail
         sat = n2.sat_dic(n2cv)
         if not self.add_sat(sat):
             return None
@@ -34,7 +36,7 @@ class Cluster(PathNode):
             if not self.add_k2(cl):
                 return None
         name = tuple(self.name)
-        self.set_bsatbits(n2)
+        self.bsatbits = self.tail1.bgrid.bitset.union(self.tail2.bgrid.bitset)
         Cluster.cluster_dic[name] = self
         Cluster.groups.setdefault(self.nov, []).append((name,self))
         return self
@@ -44,13 +46,24 @@ class Cluster(PathNode):
         dset = {b: self.sat[b] for b in bits}
         return bits, dset
 
-    def set_bsatbits(self, lower_n2):
-        self.bsatbits = self.n2.tail.bgrid.bitset
-        self.bsatbits.update(lower_n2.tail.bgrid.bitset)
-
     def grow(self, lower_tail):
         for cv, cvn2 in lower_tail.cvn2s.items():
             clu = self.clone()
             res = clu.add_n2(cvn2, cv)
-        x = 0    
+        x = 0
+
+    def test_sat(self, tsat):
+        tail_nov = None
+        for b, v in tsat.items():
+            assert(b in self.sat), "tsat not qualified"
+            if self.sat[b] != v:
+                if b in self.bsatbits:
+                    if b in self.tail1.bgrid.bits:
+                        bgrid = self.tail1.bgrid
+                        tail_nov = self.tail1.nov
+                    else:
+                        bgrid = self.tail2.bgrid
+                        tail_nov = self.tail2.nov
+                    return True, (tail_nov, bgrid.bv2cvs(b, self.sat[b]))
+        return False, None
 

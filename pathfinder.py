@@ -13,7 +13,7 @@ class PathFinder:
         self.clusters = Cluster.cluster_dic
         start_tail = branch.chain[Center.maxnov]
         self.grow_cluster(start_tail)
-        self.downwards()
+        self.downwards(branch.chain)
 
     def grow_cluster(self, tail):
         while tail.nov >= Center.minnov:
@@ -32,25 +32,40 @@ class PathFinder:
         # msg = self.cluster_sat(24)
         x = 8
 
-    def downwards(self):
+    def downwards(self, tailchain):
         nov = Center.maxnov
         while nov in Cluster.groups:
             group = Cluster.groups[nov]
             #nov: 60, 54, ...
             for name, cluster in group:
+                print(f"{name}-cluster.")
                 # name:((60,1),(57,2)),cl: cluster.name == name
                 nv = nov - 6
                 dsbits, dsat = cluster.delta_sat()
                 while nv in Cluster.groups:
                     for nam, cl in Cluster.groups[nv]:
+                        if nam[0] in cluster.blocker_set or \
+                            nam[1] in cluster.blocker_set:
+                            continue
                         ibits = dsbits.intersection(cl.sat)
-                        while len(ibits) > 0:
+                        if len(ibits) > 0:
                             idic = {b: dsat[b] for b in ibits}
+                            hit, nm = cl.test_sat(idic)
+                            if hit:
+                                print(f"{nam} hit")
+                                bnv, cvs = nm
+                                for cv in cvs:
+                                    cluster.blocker_set.add((bnv, cv))
+                                continue
+                            # else:
+                            #     print(f"{nam} passed")
                             x = 9
                         x = 0
                     nv -= 6
                 x = 0
+            print("=================")
             nov -= 6
+        x = 0
 
     def downward_blocker(self):
         for nov in self.branch.novs:
