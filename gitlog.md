@@ -1,3 +1,7 @@
+## 2023-03-16->0.394
+- block.py new class for cluster.block
+- cluster constructor support clone, cluster.merge_cluster
+- pathfinder.downward_blocker removed.
 ## 2023-03-13->0.393
 - in cluster.py: self.tail1/tail2, blocker_set, test_sat
 - in pathfinder.py: downwards

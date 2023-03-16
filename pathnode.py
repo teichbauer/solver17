@@ -99,7 +99,8 @@ class PathNode:
                     # news[obit] = new_sat[obit]
                 else:
                     pass
-            res = self.add_sat(new_sat)
-            if not res:
-                return False
+            if len(new_sat) > 0:
+                res = self.add_sat(new_sat)
+                if not res:
+                    return False
         return True

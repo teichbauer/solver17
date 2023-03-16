@@ -50,7 +50,7 @@ class BitGrid:
         return cvs
 
     def bv2cvs(self, b, v):
-        ''' in case self.bits: [54, 50, 11], and for a (b,v):(50,1),
+        ''' in case (nov.21)-self.bits: [54, 50, 11], and for a (b,v):(50,1),
             return a list of cvs:
         010 / cv:2  - {54:0, 50:1, 11:0}
         011 / cv:3  - {54:0, 50:1, 11:1}
