@@ -166,3 +166,15 @@ def testing(bgrid):
     vkI = VKlause('vkI', {1: 1, 10: 1})
 
     x = 1
+
+def print_clause_dic(clauses):
+    ks = sorted(clauses.keys())
+    for k in ks:
+        dic = clauses[k].dic
+        mark = clauses[k].mark
+        print(f"{k}: {dic}-{mark}")
+    
+def print_bitdic(bdic):
+    bs = sorted(bdic)
+    for b in bs:
+        print(f"{b}: {bdic[b]}")

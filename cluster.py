@@ -1,6 +1,7 @@
 from center import Center
 from pathnode import PathNode
 from blocker import Blocker
+from basics import sortdic, print_clause_dic, print_bitdic
 
 class Cluster(PathNode):
     cluster_dic = {}
@@ -15,8 +16,9 @@ class Cluster(PathNode):
             self.sat = {b: v for b, v in n2node.sat.items()}
             self.bitdic = {b:s.copy() for b, s in n2node.bitdic.items() }
             self.clauses = n2node.clauses.copy()
-            self.bsatbits = n2node.bsatbits.copy()
+            self.headsatbits = n2node.headsatbits.copy()
             self.block = n2node.block.clone()
+            self.pblock = {}
             return # cloning done
         # type(n2node) == CVNode2
         self.n2 = n2node
@@ -32,42 +34,39 @@ class Cluster(PathNode):
         return clu
     
     def add_n2(self, n2, n2cv):
-        if type(self.name) == tuple:
-            self.name = [self.name, (n2.tail.nov, n2cv)]
-        else:
-            self.name.append((n2.tail.nov, n2cv))
         self.tail2 = n2.tail
         sat = n2.sat_dic(n2cv)
         if not self.add_sat(sat):
             return None
         for cl in n2.clauses.values():
-            # if cl.kname == 'C0102':
-            #     x = 9
             if not self.add_k2(cl):
                 return None
-        name = tuple(self.name)
-        self.bsatbits = self.tail1.bgrid.bitset.union(self.tail2.bgrid.bitset)
-        Cluster.cluster_dic[name] = self
-        Cluster.groups.setdefault(self.nov, []).append((name,self))
+        self.headsatbits = self.tail1.bgrid.bitset.union(self.tail2.bgrid.bitset)
         return self
-
-    def delta_sat(self):
-        bits = set(self.sat) - self.bsatbits
-        dset = {b: self.sat[b] for b in bits}
-        return bits, dset
 
     def grow(self, lower_tail):
         for cv, cvn2 in lower_tail.cvn2s.items():
             clu = Cluster(self.name, self.n2.clone())
             if clu.add_sat(self.sat):
+                if type(clu.name) == tuple:
+                    clu.name = [clu.name, (lower_tail.nov, cv)]
+                else:
+                    clu.name.append((lower_tail.nov, cv))
                 clu.add_n2(cvn2, cv)
+                name = tuple(clu.name)
+                Cluster.groups.setdefault(self.nov, []).append((name, clu))
         x = 0
+
+    def body_sat(self):
+        bits = set(self.sat) - self.headsatbits
+        dset = {b: self.sat[b] for b in bits}
+        return bits, dset
 
     def test_sat(self, tsat):
         for b, v in tsat.items():
             assert(b in self.sat), "tsat not qualified"
             if self.sat[b] != v:
-                if b in self.bsatbits:
+                if b in self.headsatbits:
                     if b in self.tail1.bgrid.bits:
                         bgrid = self.tail1.bgrid
                         tail_nov = self.tail1.nov
@@ -79,6 +78,9 @@ class Cluster(PathNode):
         return False, None
 
     def merge_cluster(self, cl):
+        if (54,2) in self.name and (51,1) in self.name and \
+              (48,1) in cl.name and (45,0) in cl.name:
+            x = 8
         c = self.clone()
         c.name += cl.name
         if not c.block.update(cl.block):
@@ -92,13 +94,33 @@ class Cluster(PathNode):
             new_bits = set(c.sat) - set(old_sat)
             # in case there are new-sat(bits), see if lower tails' head on them
             if len(new_bits) > 0:
-                while lower_nov >= Center.minnov:
-                    bgrd = Center.snodes[lower_nov].tail.bgrid
+                lnov = lower_nov
+                while lnov >= Center.minnov:
+                    bgrd = Center.snodes[lnov].tail.bgrid
                     bs = new_bits.intersection(bgrd.bitset) # tail bit overlaps
                     for b in bs:
                         v = c.sat[b]
                         blck_cvs = bgrd.chvset.difference(bgrd.bv2cvs(b, v))
-                        c.block.add_block((lower_nov, blck_cvs))
-                    lower_nov -= 3
+                        c.block.add_block((lnov, blck_cvs))
+                    lnov -= 3
             return (c, lower_nov)
         return None
+
+    def set_pblock(self, tail):
+        bits = set(self.bitdic)
+        self.block.set_pblock()
+
+    def tail_block(self, tail):
+        pdic = self.pblock.setdefault(tail.nov, {})
+        bits = set(self.bitdic).intersection(tail.bgrid.bitset)
+        for sb in bits:
+            sb0_cvs = tail.bgrid.bv2cvs(sb, 0)
+            sb1_cvs = tail.bgrid.bv2cvs(sb, 1)
+            for kn in self.bitdic[sb]:
+                vk = self.clauses[kn]
+                if vk.dic[sb] == 0:
+                    x = 0
+                else:
+                    x = 9
+            x = 9
+        x = 8

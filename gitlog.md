@@ -1,3 +1,9 @@
+## 2023-03-20->0.395
+- fixes in pathfinder/downwards
+- rename cluster.bsatbits to .headsatbits, other refactoring in cluster
+- clause: added mark = (nov, (cvs))
+- minor changes in pathnode
+- progress in pathfinder
 ## 2023-03-16->0.394
 - block.py new class for cluster.block
 - cluster constructor support clone, cluster.merge_cluster

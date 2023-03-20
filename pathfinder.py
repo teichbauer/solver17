@@ -1,20 +1,15 @@
 from center import Center
-from millipede import Millipede
 from cluster import Cluster
-from basics import sortdic
+from basics import sortdic, print_bitdic, print_clause_dic
 
 class PathFinder:
     def __init__(self, branch):
         self.branch = branch
         self.sumbdic = branch.sumbdic
         self.sat = branch.sat
-        end_tail = branch.chain[Center.minnov]  # end-tail
-        self.millipede = Millipede(end_tail)
-        self.clusters = Cluster.cluster_dic
-        start_tail = branch.chain[Center.maxnov]
-        self.grow_cluster(start_tail)
-        hit_cnt = self.downwards(branch.chain)
-        # self.find_solutions()
+        self.cluster_groups = Cluster.groups
+        self.grow_cluster( branch.chain[Center.maxnov] )
+        hit_cnt = self.downwards()
         self.find_path()
 
     def grow_cluster(self, tail):
@@ -33,28 +28,22 @@ class PathFinder:
                     tail = self.branch.chain[ntail.nov - 3]
         x = 8
 
-    def upwards(self):
-        x = 0
-
-    def downwards(self, tailchain):
+    def downwards(self):
         cnt = 0
         nov = Center.maxnov
         while nov in Cluster.groups:
-            group = Cluster.groups[nov]
-            #nov: 60, 54, ...
-            for name, cluster in group:
-                print(f"{name}-cluster.")
-                # name:((60,1),(57,2)),cl: cluster.name == name
+            # nov: 60, 54, 48, 42, 36, 30, 24
+            for name, cluster in self.cluster_groups[nov]:
+                print(f"{name}-cluster.")  # cluster.name:((60,1),(57,2))
                 nv = nov - 6
-                dsbits, dsat = cluster.delta_sat()
-                while nv in Cluster.groups:
-                    for nam, cl in Cluster.groups[nv]:
-                        if cluster.block.name_inblock(name):
+                body_satbits, body_sat = cluster.body_sat()
+                while nv in self.cluster_groups:
+                    for nam, cl in self.cluster_groups[nv]:
+                        if cluster.block.name_inblock(nam):
                             continue
-                            continue
-                        ibits = dsbits.intersection(cl.sat)
+                        ibits = body_satbits.intersection(cl.sat)
                         if len(ibits) > 0:
-                            idic = {b: dsat[b] for b in ibits}
+                            idic = {b: body_sat[b] for b in ibits}
                             hit, nm = cl.test_sat(idic)
                             if hit:
                                 if nm:
@@ -62,43 +51,33 @@ class PathFinder:
                                     for cv in cvs:
                                         cluster.block.add_block((bnv, cv))
                                     cnt += len(cvs)
-                                    print(f"({bnv}, {cv}) hit")
+                                    print(f"({bnv}, {cvs}) hit")
                                     continue
                                 else:
-                                    cluster.block.add_block(name)
+                                    cluster.block.add_block(nam)
                                     cnt += 1
                                     print(f"{nam}-hit")
                     nv -= 6
             print("=================")
-            nov -= 6
+            nov -= 6 # nov/while loop, 60 ->54 ->48 ->42 ->36 ->30 ->24
         return cnt
-
-    def find_solutions(self):
-        gnvs = list(Cluster.groups.keys())
-        gi = gnvs.pop()
-        while len(gnvs) > 0:
-            g = Cluster.groups[gi]
-            g1i = gnvs.pop()
-            g1 = Cluster.groups[g1i]
-            for name, clu in g:
-                for nam, cl in g1:
-                    new_cl = clu.merge_cluster(cl)
-                    x = 0
-        x = 1
 
     def find_path(self):
         pathdic = {}
         lnv, lind = 60, 0
         nlnv = lnv - 6
-        cluster = Cluster.groups[lnv][lind][1]
-        ngrp = Cluster.groups[nlnv]
+        cluster = self.cluster_groups[lnv][lind][1]
         path = [ cluster ]
-        if not self.pathdown(path, cluster, ngrp):
+        cluster.set_pblock(Center.snodes[nlnv].tail)
+        if nlnv - 3 >= Center.minnov:
+            cluster.set_pblock(Center.snodes[nlnv-3].tail)
+        if not self.pathdown(path, cluster, self.cluster_groups[nlnv]):
             lind += 1
         else:
             x = 9
 
     def pathdown(self, path, clustr, ngrp):
+        clustr.set_pblock()
         ind = 0
         found = False
         while not found:
@@ -123,3 +102,4 @@ class PathFinder:
                 else:
                     return True
         x = 0
+        

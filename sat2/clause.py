@@ -1,10 +1,11 @@
 from sat2.lib2 import expand_bitcombo
 
 class Clause:
-    def __init__(self, name, dic):
+    def __init__(self, name, dic, mark=None):
         self.kname = name
         self.bits = sorted(dic)
         self.dic = dic
+        self.mark = mark
 
     def other_bit(self, b):
         ''' Only for vk with 2 bits: return the other bit '''

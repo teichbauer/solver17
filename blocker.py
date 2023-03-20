@@ -6,6 +6,7 @@ class Blocker:
         self.nov = parent.nov
         self.block_dic = {}
         self.block_set = set()
+        self.pblock_dic = {}
 
     def clone(self):
         c = Blocker(self.parent)
@@ -13,6 +14,9 @@ class Blocker:
         c.block_set = self.block_set.copy()
         return c
     
+    def set_pblock(self):
+        pass
+
     def update(self, block):
         for nv, xlst in block.block_dic.items():
             lst = self.block_dic.setdefault(nv, [])
@@ -51,6 +55,7 @@ class Blocker:
             return True
         ss = set(name)
         cx = self.block_set.intersection(ss)
-        return len(cx) > 0
+        in_it = len(cx) > 0
+        return in_it
 
     

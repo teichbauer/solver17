@@ -26,7 +26,10 @@ class PathNode:
             else:
                 return True
         touch = dicbits.intersection(self.bitdic)
-        cl = Clause(vk.kname, dic)
+        if type(vk) == Clause:
+            cl = Clause(vk.kname, dic, vk.mark)
+        else:
+            cl = Clause(vk.kname, dic, (vk.nov, tuple(vk.cvs)))
 
         if len(touch) == 2:   # 2 bits in self.bitdic
             # collect kns that share 1 or 2 bit
@@ -64,13 +67,14 @@ class PathNode:
         self.clauses[vk.kname] = cl
         return True
 
-    def add_sat(self, sat):
+    def add_sat(self, input_sat):
         '''
         a sat bit:value pair like {5:1} means: the value on bit 5 must be 1,
         othewise this will make F=()^()^.. fail. So, if a k2 has bit 5,
         and: a): bv is 1 -> this ke can eliminate bit-5, k2 becomes sat-bit;
         b), bv is 0 -> this k2 can be eliminated, the 5:1 makes it so.
         '''
+        sat = input_sat.copy()
         while len(sat) > 0:
             sbit, sval = sat.popitem()
             if sbit in self.sat:
