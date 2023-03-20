@@ -68,16 +68,20 @@ class PathFinder:
         nlnv = lnv - 6
         cluster = self.cluster_groups[lnv][lind][1]
         path = [ cluster ]
-        cluster.set_pblock(Center.snodes[nlnv].tail)
-        if nlnv - 3 >= Center.minnov:
-            cluster.set_pblock(Center.snodes[nlnv-3].tail)
         if not self.pathdown(path, cluster, self.cluster_groups[nlnv]):
             lind += 1
         else:
             x = 9
 
     def pathdown(self, path, clustr, ngrp):
-        clustr.set_pblock()
+        # set pblock for the next 2 lower tails
+        nv = clustr.nov - 6
+        tails = []
+        while nv >= Center.minnov and nv >= clustr.nov - 9:
+            tails.append(Center.snodes[nv].tail)
+            nv -= 3
+        clustr.set_pblock(tails)
+
         ind = 0
         found = False
         while not found:

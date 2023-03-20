@@ -14,8 +14,8 @@ class Blocker:
         c.block_set = self.block_set.copy()
         return c
     
-    def set_pblock(self):
-        pass
+    def set_pblock(self, tail):
+        x = 0
 
     def update(self, block):
         for nv, xlst in block.block_dic.items():

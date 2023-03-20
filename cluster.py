@@ -106,9 +106,10 @@ class Cluster(PathNode):
             return (c, lower_nov)
         return None
 
-    def set_pblock(self, tail):
+    def set_pblock(self, tails):
         bits = set(self.bitdic)
-        self.block.set_pblock()
+        for tail in tails:
+            self.block.set_pblock(tail)
 
     def tail_block(self, tail):
         pdic = self.pblock.setdefault(tail.nov, {})

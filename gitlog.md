@@ -1,3 +1,5 @@
+## 2023-03-20->0.396
+- pathfinder/cluster/blocker getting ready for set-pblock
 ## 2023-03-20->0.395
 - fixes in pathfinder/downwards
 - rename cluster.bsatbits to .headsatbits, other refactoring in cluster
