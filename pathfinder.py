@@ -63,7 +63,6 @@ class PathFinder:
         return cnt
 
     def find_path(self):
-        pathdic = {}
         lnv, lind = 60, 0
         nlnv = lnv - 6
         cluster = self.cluster_groups[lnv][lind][1]

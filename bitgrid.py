@@ -61,10 +61,13 @@ class BitGrid:
         if b not in self.bits: return None
         ind = self.bits.index(b)
         cvs = []
+        ncvs = []
         for cv in self.chvset:
             if get_bit(cv, ind) == v:
                 cvs.append(cv)
-        return cvs
+            else:
+                ncvs.append(cv)
+        return cvs, ncvs
 
 
     def grid_sat(self, cv):

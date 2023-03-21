@@ -73,7 +73,7 @@ class Cluster(PathNode):
                     else:
                         bgrid = self.tail2.bgrid
                         tail_nov = self.tail2.nov
-                    return True, (tail_nov, bgrid.bv2cvs(b, self.sat[b]))
+                    return True, (tail_nov, bgrid.bv2cvs(b, self.sat[b])[0])
                 return True, None
         return False, None
 
@@ -100,8 +100,7 @@ class Cluster(PathNode):
                     bs = new_bits.intersection(bgrd.bitset) # tail bit overlaps
                     for b in bs:
                         v = c.sat[b]
-                        blck_cvs = bgrd.chvset.difference(bgrd.bv2cvs(b, v))
-                        c.block.add_block((lnov, blck_cvs))
+                        c.block.add_block((lnov, bgrd.bv2cvs(b, v)[1]))
                     lnov -= 3
             return (c, lower_nov)
         return None
@@ -109,19 +108,7 @@ class Cluster(PathNode):
     def set_pblock(self, tails):
         bits = set(self.bitdic)
         for tail in tails:
-            self.block.set_pblock(tail)
-
-    def tail_block(self, tail):
-        pdic = self.pblock.setdefault(tail.nov, {})
-        bits = set(self.bitdic).intersection(tail.bgrid.bitset)
-        for sb in bits:
-            sb0_cvs = tail.bgrid.bv2cvs(sb, 0)
-            sb1_cvs = tail.bgrid.bv2cvs(sb, 1)
-            for kn in self.bitdic[sb]:
-                vk = self.clauses[kn]
-                if vk.dic[sb] == 0:
-                    x = 0
-                else:
-                    x = 9
-            x = 9
-        x = 8
+            headbits = tail.bgrid.bitset.intersection(self.bitdic)
+            print(f"{self.name}->{tail.nov}: head-bits: {headbits}")
+            if len(headbits) > 0:
+                self.block.set_pblock(headbits, tail)
