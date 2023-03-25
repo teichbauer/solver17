@@ -1,3 +1,8 @@
+## 2023-03-25->0.399
+- preparing for more sat-analysis
+  basics: test_clauses, sat_compatible
+  Center.test_clauses (test against know 8 sats)
+- refactor pathfinder
 ## 2023-03-24->0.398
 - satx8: list all 8 sats, with 14x4 head-sats and 18 body sats
 - pathfinder/cluster block_filter, pblock_filter, remove_clause

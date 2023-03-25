@@ -166,6 +166,25 @@ def testing(bgrid):
     vkI = VKlause('vkI', {1: 1, 10: 1})
 
     x = 1
+def test_clauses(clause_dic, sat):
+    hits = []
+    for kn, clause in clause_dic.items():
+        if 'verify' in dir(clause):     # Clause class
+            if not clause.verify(sat):
+                print(f"{kn}:{clause.dic} -({clause.mark}) HIT")
+                hits.append((kn, clause.dic))
+        elif clause.hit(sat):           # VKlause class
+            print(f"{kn}:{clause.dic} - HIT")
+            hits.append((kn, clause.dic))
+    return hits
+
+def sat_compatible(sat1, sat2):
+    # see if case like s1[10]==0, s2[10]==1 exists (not compatible)
+    bits = set(sat1).intersection(sat2)
+    for bit in bits:
+        if sat1[bit] != sat2[bit]:
+            return False
+    return True
 
 def print_clause_dic(clauses):
     ks = sorted(clauses.keys())

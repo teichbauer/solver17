@@ -60,7 +60,7 @@ class Clause:
         if set(self.bits).issubset(set(sats)):
             b0, b1 = self.bits
             if self.dic[b0] == sats[b0] and self.dic[b1] == sats[b1]:
-                print(f"{self.kname} = hit(False)")
+                # print(f"{self.kname} = hit(False)")
                 return False
             return True
         raise Exception(f"{self.kname} not in sat")

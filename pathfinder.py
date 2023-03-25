@@ -1,31 +1,28 @@
 from center import Center
 from cluster import Cluster
-from basics import sortdic, print_bitdic, print_clause_dic
+from basics import sortdic, print_bitdic, print_clause_dic, test_clauses
 
 class PathFinder:
     def __init__(self, branch):
         self.branch = branch
+        self.tails = {nv: branch.chain[nv] for nv in Center.snodes}
         self.sumbdic = branch.sumbdic
         self.sat = branch.sat
         self.cluster_groups = Cluster.groups
-        self.grow_cluster( branch.chain[Center.maxnov] )
+        self.grow_cluster(60)
         hit_cnt = self.downwards()
         self.find_path()
 
-    def grow_cluster(self, tail):
-        while tail.nov >= Center.minnov:
-            if tail.nov >= Center.minnov + 3:
-                ntail = self.branch.chain[tail.nov - 3]
-                for cv, cvn2 in tail.cvn2s.items():
-                    cluster = Cluster((tail.nov,cv), cvn2)
-                    # grow cluster between (tail, ntail)
-                    cluster.grow(ntail)
-                if ntail.nov == Center.minnov:
-                    break
-                elif ntail.nov - 3 < Center.minnov:
-                    tail = self.branch.chain[Center.minnov]
-                else:
-                    tail = self.branch.chain[ntail.nov - 3]
+    def grow_cluster(self, tail_nv):
+        while tail_nv > Center.minnov:
+            tail = self.tails[tail_nv]
+            ntail = self.tails[tail_nv - 3]
+            for cv, cvn2 in tail.cvn2s.items():
+                cluster = Cluster((tail.nov,cv), cvn2)
+                Cluster.clusters[tail_nv] = cluster
+                # grow cluster between (tail, ntail)
+                cluster.grow(ntail)
+            tail_nv -= 6
         x = 8
 
     def downwards(self):
@@ -82,10 +79,19 @@ class PathFinder:
         clustr.set_pblock(tails)
         grp = clustr.block_filter(ngrp)
 
+        nv = clustr.nov - 6
+        while nv >= Center.minnov:
+            res = test_clauses(self.tails[nv].vk2dic, clustr.sat)
+            nv -= 3
+
         ind = 0
         found = False
         while not found:
             nclstr = grp[ind]
+            for i in (0,1,2,3,4,5,6,7):
+                res = Center.test_clauses(clustr.clauses, i)
+                rea = Center.test_clauses(nclstr.clauses, i)
+
             nx = clustr.merge_cluster(nclstr)
             if not nx:
                 ind += 1

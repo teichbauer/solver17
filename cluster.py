@@ -4,7 +4,7 @@ from blocker import Blocker
 from basics import sortdic, print_clause_dic, print_bitdic
 
 class Cluster(PathNode):
-    cluster_dic = {}
+    clusters = {}
     groups = {}
 
     def __init__(self, name, n2node):
