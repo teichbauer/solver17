@@ -1,4 +1,6 @@
 from basics import verify_sat
+from sat2.clause import Clause
+from satx8 import SATS
 
 class Center:
     maxnov = 0
@@ -14,6 +16,21 @@ class Center:
     vk2bdic = {}  # <bit>:[<tail1>,<tail2>,...], <bit>:[],..}
     orig_vkm = None
     root_branch = None
+
+    # 8 sats:
+    @classmethod
+    def test_clauses(clause_dic, sat_index):
+        sat = SATS[sat_index]
+        for kn, clause in clause_dic.items():
+            if type(clause) == Clause:
+                if not clause.verify(sat):
+                    print(f"{kn}:{clause.dic} - HIT")
+                    return False
+                elif clause.hit(sat):
+                    print(f"{kn}:{clause.dic} - HIT")
+                    return False
+        return True
+
 
     @classmethod
     def add_blocks(cls, nov, bchecker):

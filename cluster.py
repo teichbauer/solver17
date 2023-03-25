@@ -11,6 +11,7 @@ class Cluster(PathNode):
         self.name = name
         if type(n2node) == Cluster:  # n2node is a cluster clone it
             self.n2 = n2node.n2
+            self.nov = n2node.nov
             self.tail1 = n2node.tail1
             self.tail2 = n2node.tail2
             self.sat = {b: v for b, v in n2node.sat.items()}
@@ -33,6 +34,14 @@ class Cluster(PathNode):
         clu = Cluster(self.name.copy(), self)
         return clu
     
+    def remove_clause(self, kn):
+        if kn in self.clauses:
+            vk = self.clauses.pop(kn)
+            for bit in vk.bits:
+                self.bitdic[bit].remove(kn)
+                if len(self.bitdic[bit]) == 0:
+                    del self.bitdic[bit]
+        
     def add_n2(self, n2, n2cv):
         self.tail2 = n2.tail
         sat = n2.sat_dic(n2cv)
@@ -85,6 +94,8 @@ class Cluster(PathNode):
         c.name += cl.name
         if not c.block.update(cl.block):
             return None
+        if not c.pblock_filter(self.block.pblock_dic, cl):
+            return None
         if c.add_sat(cl.sat):
             old_sat = c.sat.copy()
             for clause in cl.clauses.values():
@@ -105,6 +116,13 @@ class Cluster(PathNode):
             return (c, lower_nov)
         return None
 
+    def block_filter(self, grp):
+        newgrp = []
+        for g in grp:
+            if not self.block.name_inblock(g[0]):
+                newgrp.append(g[1])
+        return newgrp
+
     def set_pblock(self, tails):
         bits = set(self.bitdic)
         for tail in tails:
@@ -112,3 +130,15 @@ class Cluster(PathNode):
             print(f"{self.name}->{tail.nov}: head-bits: {headbits}")
             if len(headbits) > 0:
                 self.block.set_pblock(headbits, tail)
+
+    def pblock_filter(self, pbdic, lower_clustr):
+        ss = set(lower_clustr.name)
+        for nv,cv in ss:
+            if nv in pbdic and cv in pbdic[nv]:
+                for kn, op in pbdic[nv][cv].items():
+                    self.remove_clause(kn)
+                    if op != '-':  # op is a new sat
+                        if not self.add_sat(op):
+                            return False
+        # no conflict that causes this cluster to hit
+        return True

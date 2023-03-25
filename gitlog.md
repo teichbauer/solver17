@@ -1,3 +1,6 @@
+## 2023-03-24->0.398
+- satx8: list all 8 sats, with 14x4 head-sats and 18 body sats
+- pathfinder/cluster block_filter, pblock_filter, remove_clause
 ## 2023-03-21->0.397
 - progress
 ## 2023-03-20->0.396

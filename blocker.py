@@ -25,17 +25,19 @@ class Blocker:
             vk = self.parent.clauses[kn]
             cvs, ncvs = tail.bgrid.bv2cvs(bit, vk.dic[bit])
             # vk.dic[bit] != tailcv.sat[bit]
-            for cv in ncvs: # tail.cv has sat: {..<bit>:..}
-                dic.setdefault(cv,{})[kn] = '-' # vk not be involved
+            for cv in ncvs:
+                dic.setdefault(cv,{})[kn] = '-'
             # vk.dic[bit] == tailcv.sat[bit]
-            for cv in cvs: # vk.dic -> new-sat: {<other-bit-of-vk>:<not v>}
-                obit = vk.other_bit(bit)
-                okns = self.parent.bitdic[obit]
-                okns.remove(kn)
-                for xkn in okns:
-                    x = 0
+            obit = vk.other_bit(bit)
+            okns = self.parent.bitdic[obit].copy()
+            if len(okns) == 0:
+                continue
+            newsat = {obit: int(not vk.dic[obit])}
+            while len(okns) > 0:
+                okn = okns.pop()
+                for cv in cvs: # vk.dic -> new-sat: {<other-bit-of-vk>:<not v>}
+                    dic.setdefault(cv, {})[okn] = newsat
                 x = 1
-                # dic.setdefault(cv,{})[kn] = ''
             x = 9
 
 

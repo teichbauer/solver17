@@ -80,20 +80,16 @@ class PathFinder:
             tails.append(Center.snodes[nv].tail)
             nv -= 3
         clustr.set_pblock(tails)
+        grp = clustr.block_filter(ngrp)
 
         ind = 0
         found = False
         while not found:
-            nclstr = ngrp[ind][1]
-            if clustr.block.name_inblock(tuple(nclstr.name)):
-                ind += 1
-                if ind > (len(ngrp) - 1):
-                    return None
-                continue
+            nclstr = grp[ind]
             nx = clustr.merge_cluster(nclstr)
             if not nx:
                 ind += 1
-                if ind > (len(ngrp) - 1):
+                if ind > (len(grp) - 1):
                     return None
             else:
                 cl, mv = nx
