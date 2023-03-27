@@ -1,3 +1,7 @@
+## 2023-03-26->0.400
+- 0398-blockers-a.txt: try to under stand
+  tail. bchecker/block_dic, checkerdic
+      .blbmgr.block_bv_dic, cbdic
 ## 2023-03-25->0.399
 - preparing for more sat-analysis
   basics: test_clauses, sat_compatible
