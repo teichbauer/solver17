@@ -136,7 +136,7 @@ class BlbManager:
                         # if vk2[bit] != bv, this vk[bit] == (NOT bv) and this 
                         # will knock off this b:v, generating a new block:
                         # vk2[b]: v. here b is the other bit in vk2
-                        vk1 = vk2_clone.clone([bit])
+                        vk1 = vk2_clone.clone([bit]) # vk2 drops bit -> vk1
                         b, v = vk1.hbit_value()
                         new_block_bv_dic.setdefault(b,{})[v] = comm_cvs
                         new_block_bv_dic[b]['kn'] = vk2.kname

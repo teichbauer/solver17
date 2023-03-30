@@ -16,7 +16,7 @@ class Clause:
         return None
 
     def clone(self):  
-        return Clause(self.kname, self.dic.copy())
+        return Clause(self.kname, self.dic.copy(), self.mark)
 
     def evaluate_overlap(self, cl):
         ''' Only for vk2, and only for self.bits == cl.bits            

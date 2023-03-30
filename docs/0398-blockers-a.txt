@@ -1,4 +1,4 @@
-2023-03-26 <-2022-09-17
+2023-03-29 <-2022-09-17
 try to understand what blocks, and cblocks mean
 ----------------------------------------------------------
 nov60 
@@ -6,6 +6,20 @@ nov60
     2:  [
             (60[4]   ^ 30[357]   ^ 24[0145]),
         ]
+    explanation:
+      60[14]/C0189[2-0,8-1](14), when meeting 
+      nov30 [59 42 8](1) on 30[357] bit 8==1
+      making C0189->[2-0], resulting 
+        sat{2:0}. 
+      But nov60's C0209[2-1,44-0](467), meeting with nov24
+      nov24 [46 44 36](6), 24(0145) have bit 44==0, making
+      C0209->[2-1] resulting
+        sat{2:1}
+      C0198 has nov60(14), C0209 has nov60(467), so, the encounter
+        (60[4]   ^ 30[357]   ^ 24[0145]) will have 
+        sat{2:0} and sat{2:1}  conflicting on bit 2
+     this makes this combination impossible
+    ---------------------------------------------
     8:  [
             (60[6]   ^ 51[246]   ^ 33[567]),
             (60[46]  ^ 42[0145]  ^ 33[567]),
@@ -33,12 +47,67 @@ nov60
     53: [
             (60[46]  ^ 51[145]   ^ 45[0246])
         ]
+    explanation:
+      nov60's 2 vk2s touch bit 53:
+      C0120[53-0 28-0](467) and C0208[53-1 20-0](246)
+      meeting nov51 [39 20  9](0), 
+                  1   0  0  1   ->  bit 20: 0
+                  2   0  1  0
+                  3   0  1  1
+                  4   1  0  0   ->  bit 20: 0
+                  5   1  0  1   ->  bit 20: 0
+                  6   1  1  0
+                  7   1  1  1
+        on nov51(145) bit 20==0, making
+        C0208->[53-1] => sat{53:0}
+        
+      meeting nov45 [49 29 28](1), 
+                   0  0  0  0  -> bit 28: 0
+                   2  0  1  0  -> bit 28: 0
+                   3  0  1  1
+                   4  1  0  0  -> bit 28: 0
+                   5  1  0  1
+                   6  1  1  0  -> bit 28: 0
+                   7  1  1  1
+        on nov45(0246), bit 28==0, making
+        C0120->[53-0] => sat{53:1}
+      C0120 and C0208 share cvs: (46). So the 3-combination:
+        (60[46]  ^ 51[145]   ^ 45[0246])
+      will have 2 conflicting sats {53:0, 53:1}, making this impossible
   ------
 - cblocks:
     +++ new format: AND btwn 60:[set] and 30:[set] 
-    2: {0: [{kn:C0189, 60:{1,4},   30:{3,5,7}}  ],
-        1: [{kn:C0209, 60:{4,6,7}, 24:{0,1,4,5})]
+    2: {0: [{kn:C0189, 60:{1,4},   30:{3,5,7}}  ], => explanation-0
+        1: [{kn:C0209, 60:{4,6,7}, 24:{0,1,4,5})]  => explanation-1
        }
+      explanation-0: 
+        C0189 [2-0,8-1](14) in nov60, meeting with
+        nov30 [59 42  8](1), 
+             0  0  0  0
+             2  0  1  0
+             3  0  1  1  -> bit 8: 1
+             4  1  0  0
+             5  1  0  1  -> bit 8: 1
+             6  1  1  0
+             7  1  1  1  -> bit 8: 1
+        for 30(357): bit 8==1
+        this combination will make C0189->[2-0], resulting a 
+          sat{2:1}
+          
+      explanation-1:
+        C0209 [2-1, 44-0](467) in nov60, meeting with 
+        nov24 [46 44 36](6), 
+             0  0  0  0  -> bit 44: 0
+             1  0  0  1  -> bit 44: 0
+             2  0  1  0
+             3  0  1  1
+             4  1  0  0  -> bit 44: 0
+             5  1  0  1  -> bit 44: 0
+             7  1  1  1
+        for 24(0145): bit 44==0
+        this combination will make C0209->[2-1], resulting a
+          sat{2:0}
+    ------------------------
     4： {0: [{kn:C0050, 60:{1,3,7}, 30:{0,2,3}}  ]}
     5： {0: [{kn:C0197, 60[137] ^ 21[045]}        ]}
     8: {0: [{C0032, 60[467] ^ 33[567]}    ],
@@ -106,6 +175,32 @@ blbmgr:
 nov57
 - blocks:
     *:  [   (57[26]    ^ 51[1])   ]
+    explanation:
+    nov57 has C0100 and C0145 both touching bit-30
+    - C0100 { 30-0, 20-0 }(2367) when meeting 
+      nov51 [39 20  9](0)
+          1   0  0  1  -> bit 20: 0
+          2   0  1  0
+          3   0  1  1
+          4   1  0  0  -> bit 20: 0
+          5   1  0  1  -> bit 20: 0
+          6   1  1  0
+          7   1  1  1
+        when nov51(145), C0100->[30-0] -> sat{30:1}
+        
+    -C0145 { 39-0, 30-1 }(0246) when meeting nov51
+      nov51 [39 20  9](0)
+          1   0  0  1  -> bit 39: 0
+          2   0  1  0  -> bit 39: 0
+          3   0  1  1  -> bit 39: 0
+          4   1  0  0 
+          5   1  0  1 
+          6   1  1  0
+          7   1  1  1
+       when nov51(123), C0145->[30-1] -> sat{30:0}
+    C0100 and C0145 share cvs: (26), on nov51(1)
+    there will be sat{30:1} and sat{30:0} -> sat-conflict
+    --------------------------------
     0:  [   (57[357]   ^ 39[0246]  ^ 21[2367] ) ]
     7:  [   
             (57[37]    ^ 51[4567]  ^ 48[145]),

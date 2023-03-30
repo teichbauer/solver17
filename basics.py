@@ -119,7 +119,7 @@ def sortdic(d):
     return dd
 
 def display_vkdic(vkd, title=None, outfile=None):
-    kns = list(vkd.keys())
+    kns = sorted(vkd.keys())
     kns.sort()
     if outfile:
         now = datetime.now()
@@ -136,7 +136,10 @@ def display_vkdic(vkd, title=None, outfile=None):
             print(title)
         for kn in kns:
             vk = vkd[kn]
-            print(f"{kn}: " + ordered_dic_string(vk.dic)[0])
+            msg = f"{kn}: " + ordered_dic_string(vk.dic)[0]
+            if len(vk.bits) < 3:
+                msg += f" {vk.nov},{vk.cvs}"
+            print(msg)
         print("-------------")
 
 

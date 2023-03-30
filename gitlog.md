@@ -1,3 +1,7 @@
+## 2023-03-30->0.401
+- understood what I previously did in tail.bchecker and .blbmgr.
+  wrote this info into docs/0398-blockers-a.txt /0400-tail-vks.txt
+  After this check-in, I will branch off to be solver18.
 ## 2023-03-26->0.400
 - 0398-blockers-a.txt: try to under stand
   tail. bchecker/block_dic, checkerdic
